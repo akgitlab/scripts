@@ -2,9 +2,8 @@
 
 nft="/sbin/nft";
 
-echo "Are you sure you want to execute the initial firewall configuration script? [y/n]"
-read q
-if [[ "$q" == "y" ]];
+read -r -p "Are you sure you want to execute the initial firewall configuration script? [y/n]"  response
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
 then
 
         ${nft} flush ruleset
@@ -43,6 +42,8 @@ then
         ${nft} -s list ruleset | tee /etc/nftables.conf > /dev/null 2>&1
 
         echo "Firewall configuration applied successfully"
+
 else
         echo "Changes canceled"
+
 fi
