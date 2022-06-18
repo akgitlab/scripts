@@ -3,8 +3,8 @@
 # Nftables firewall presets for voip server
 # Andrey Kuznetsov, 2022.06.18
 # Telegram: https://t.me/akmsg
-#
-#Carefully check all the settings, because by applying this script you can block your access to the server!
+
+# WARNING! Carefully check all the settings, because by applying this script you can block your access to the server!
 
 # Get variables
 nft="/sbin/nft";
