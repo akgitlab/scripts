@@ -2,7 +2,7 @@
 
 nft="/sbin/nft";
 
-echo "Are you sure you want to execute the initial configuration script? [y/n]"
+echo "Are you sure you want to execute the initial firewall configuration script? [y/n]"
 read q
 if [[ "$q" == "y" ]];
 then
@@ -20,12 +20,9 @@ then
         ${nft} add rule inet filter input ip protocol icmp counter accept
         #---------------------admin input----------------------#
         ${nft} add rule inet filter input ip saddr 10.3.44.0/24 tcp dport 22 counter accept
-        ${nft} add rule inet filter input tcp dport 22 counter drop
         ${nft} add rule inet filter input ip saddr 10.3.44.0/24 tcp dport { 80, 443 } counter accept
-        ${nft} add rule inet filter input tcp dport { 80, 443 } counter drop
-        #--------------------zabbix input----------------------#
-        ${nft} add rule inet filter input ip saddr 10.0.22.21 tcp dport 10050 counter accept
-        ${nft} add rule inet filter input tcp dport 10050 counter drop
+        ${nft} add rule inet filter input ip saddr 10.0.22.21/32 tcp dport { 22, 80, 443, 5038, 8088, 10050 } counter accept
+        ${nft} add rule inet filter input tcp dport { 22, 80, 443, 5038, 8088, 10050 } counter drop
         #-----------------sip provider input-------------------#
         ${nft} add rule inet filter input ip saddr sip.beeline.ru udp dport 5000-5170 counter accept
         ${nft} add rule inet filter input ip saddr sip.beeline.ru udp dport 10000-20000 counter accept
@@ -43,7 +40,9 @@ then
         ${nft} add rule inet filter input ct state new udp dport 10000-20000 counter drop
         ${nft} add rule inet filter input counter reject with icmp type host-prohibited
 
-        echo "succesfully"
+        ${nft} -s list ruleset | tee /etc/nftables.conf > /dev/null 2>&1
+
+        echo "Firewall configuration applied successfully"
 else
-        echo "canceled"
+        echo "Changes canceled"
 fi
