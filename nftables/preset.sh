@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 nft="/sbin/nft";
