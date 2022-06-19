@@ -26,8 +26,9 @@ then
         ${nft} add rule inet filter input iifname "lo" counter accept
         ${nft} add rule inet filter input ip protocol icmp counter accept
         #---------------------admin input----------------------#
-        ${nft} add rule inet filter input ip saddr 10.3.44.0/24 tcp dport 22 counter accept
         ${nft} add rule inet filter input ip saddr 10.1.1.48/32 tcp dport 22 counter accept
+        ${nft} add rule inet filter input ip saddr 10.3.44.0/24 tcp dport 22 counter accept
+        ${nft} add rule inet filter input ip saddr 10.250.250.0/24 tcp dport 22 counter accept
         ${nft} add rule inet filter input ip saddr 10.3.44.0/24 tcp dport { 80, 443 } counter accept
         ${nft} add rule inet filter input ip saddr 10.0.22.21/32 tcp dport { 22, 80, 443, 5038, 8088, 10050 } counter accept
         ${nft} add rule inet filter input tcp dport { 22, 80, 443, 5038, 8088, 10050 } counter drop
