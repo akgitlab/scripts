@@ -67,7 +67,7 @@ fi
 # Final stage of action
 echo "Making symbolic link for $FDQN and reload service..."
 ln -s /etc/nginx/sites-available/"$FDQN" /etc/nginx/sites-enabled/"$FDQN"
-/etc/init.d/nginx reload 2>&1 > /dev/null
+/etc/init.d/nginx reload 2> /dev/null
 if [ $? -eq 0 ]
 then
   echo -e "\033[32mService Nginx restart completed. $FDQN has been setup. Enjoy!"
