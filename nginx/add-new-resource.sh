@@ -14,16 +14,16 @@ DATE=$(date  +%Y)
 # Configuration file existence check
 if [ -e /etc/nginx/sites-available/$FDQN ]
 then
-echo -e "\033[0m\033[0m\033[31mError: the configuration for the resource already exists!"
-tput sgr0
+  echo -e "\033[0m\033[0m\033[31mError: the configuration for the resource already exists!"
+  tput sgr0
 else
 
 # Start destination server ping check
 ping -c 3 $SRV  2>&1 > /dev/null
 if [ $? -ne 0 ]
 then
-echo -e "\033[0m\033[0m\033[31mError: destination server is not available, check it before next script run!"
-tput sgr0   
+  echo -e "\033[0m\033[0m\033[31mError: destination server is not available, check it before next script run!"
+  tput sgr0
 else
 
 # Start creating configuration file for new site
@@ -42,7 +42,7 @@ server {
 
     # SSL certificate files
     ssl_certificate /etc/nginx/certs/$DATE/$CRT;
-    ssl_certificate_key /etc/nginx/certs/$DATE/$KEY;
+    ssl_certificate_key /etc/nginx/certs/$DATE/$KEY
 
     # Log files path
     access_log /var/log/nginx/$FDQN.access.log;
@@ -62,12 +62,18 @@ server {
 }
 EOF
 ) >  /etc/nginx/sites-available/$FDQN
+fi
 
 # Final stage of action
 echo "Making symbolic link for $FDQN and reload service..."
 ln -s /etc/nginx/sites-available/"$FDQN" /etc/nginx/sites-enabled/"$FDQN"
-/etc/init.d/nginx reload
-echo -e "\033[32mService Nginx restart completed. $FDQN has been setup. Enjoy!"
-tput sgr0
+/etc/init.d/nginx reload 2>&1 > /dev/null
+if [ $? -eq 0 ]
+then
+  echo -e "\033[32mService Nginx restart completed. $FDQN has been setup. Enjoy!"
+  tput sgr0
+else
+  echo -e "\033[0m\033[0m\033[31mError: service restart failed, check for errors by running command nginx -t"
+  tput sgr0
 fi
 fi
