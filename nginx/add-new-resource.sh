@@ -65,15 +65,18 @@ EOF
 fi
 
 # Final stage of action
-echo "Making symbolic link for $FDQN and reload service..."
+echo "Making symbolic link for new site and reload service..."
 ln -s /etc/nginx/sites-available/"$FDQN" /etc/nginx/sites-enabled/"$FDQN"
-/etc/init.d/nginx reload 2> /dev/null
+/etc/init.d/nginx reload > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
-  echo -e "\033[32mService Nginx restart completed. $FDQN has been setup. Enjoy!"
+  echo -e "\033[32mService Nginx restart completed and new site has been setup! Enjoy..."
   tput sgr0
 else
-  echo -e "\033[0m\033[0m\033[31mError: service restart failed, check for errors by running command nginx -t"
+  rm /etc/nginx/sites-available/"$FDQN"
+  rm /etc/nginx/sites-enabled/"$FDQN"
+  /etc/init.d/nginx reload > /dev/null 2>&1
+  echo -e "\033[0m\033[0m\033[31mError: check the existence and names of the certificates and try again later..."
   tput sgr0
 fi
 fi
