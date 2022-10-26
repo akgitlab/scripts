@@ -14,7 +14,8 @@ DATE=$(date  +%Y)
 # Configuration file existence check
 if [ -e /etc/nginx/sites-available/$FDQN ]
 then
-echo "The configuration for the resource already exists"
+echo -e "\033[0m\033[0m\033[31mError: the configuration for the resource already exists!"
+tput sgr0
 else
 
 # Start creating configuration file for new site
@@ -57,5 +58,6 @@ EOF
 echo "Making symbolic link for $FDQN and reload service..."
 ln -s /etc/nginx/sites-available/"$FDQN" /etc/nginx/sites-enabled/"$FDQN"
 /etc/init.d/nginx reload
-echo "Service Nginx restart completed. $FDQN has been setup. Enjoy!"
+echo -e "\033[32mService Nginx restart completed. $FDQN has been setup. Enjoy!"
+tput sgr0
 fi
