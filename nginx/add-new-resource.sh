@@ -19,7 +19,7 @@ tput sgr0
 else
 
 # Start destination server ping check
-ping -c 3 $SRV
+ping -c 3 $SRV  2>&1 > /dev/null
 if [ $? -ne 0 ]
 then
 echo -e "\033[0m\033[0m\033[31mError: destination server is not available, check it before next script run!"
@@ -68,4 +68,5 @@ ln -s /etc/nginx/sites-available/"$FDQN" /etc/nginx/sites-enabled/"$FDQN"
 /etc/init.d/nginx reload
 echo -e "\033[32mService Nginx restart completed. $FDQN has been setup. Enjoy!"
 tput sgr0
+fi
 fi
