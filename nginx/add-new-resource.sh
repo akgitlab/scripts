@@ -18,6 +18,14 @@ echo -e "\033[0m\033[0m\033[31mError: the configuration for the resource already
 tput sgr0
 else
 
+# Start destination server ping check
+ping -c 3 $SRV
+if [ $? -ne 0 ]
+then
+echo -e "\033[0m\033[0m\033[31mError: destination server is not available, check it before next script run!"
+tput sgr0   
+else
+
 # Start creating configuration file for new site
 echo "Making configuration file for  $FDQN..."
 (
