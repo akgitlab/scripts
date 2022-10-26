@@ -27,7 +27,7 @@ tput sgr0
 else
 
 # Start creating configuration file for new site
-echo "Making configuration file for  $FDQN..."
+echo "Making configuration file for $FDQN..."
 (
 cat <<EOF
 server {
@@ -44,7 +44,7 @@ server {
     ssl_certificate /etc/nginx/certs/$DATE/$CRT;
     ssl_certificate_key /etc/nginx/certs/$DATE/$KEY;
 
-    # Log files
+    # Log files path
     access_log /var/log/nginx/$FDQN.access.log;
     error_log /var/log/nginx/$FDQN.error.log;
 
@@ -63,6 +63,7 @@ server {
 EOF
 ) >  /etc/nginx/sites-available/$FDQN
 
+# Final stage of action
 echo "Making symbolic link for $FDQN and reload service..."
 ln -s /etc/nginx/sites-available/"$FDQN" /etc/nginx/sites-enabled/"$FDQN"
 /etc/init.d/nginx reload
