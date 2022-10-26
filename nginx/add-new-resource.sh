@@ -27,7 +27,7 @@ then
 else
 
 # Start creating configuration file for new site
-echo "Making configuration file for $FDQN..."
+echo "Making configuration file..."
 (
 cat <<EOF
 server {
@@ -65,8 +65,9 @@ EOF
 fi
 
 # Final stage of action
-echo "Making symbolic link for new site and reload service..."
+echo "Making symbolic link..."
 ln -s /etc/nginx/sites-available/"$FDQN" /etc/nginx/sites-enabled/"$FDQN"
+echo "Reload NGING proxy service..."
 /etc/init.d/nginx reload > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
