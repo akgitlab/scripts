@@ -42,7 +42,7 @@ server {
 
     # SSL certificate files
     ssl_certificate /etc/nginx/certs/$DATE/$CRT;
-    ssl_certificate_key /etc/nginx/certs/$DATE/$KEY
+    ssl_certificate_key /etc/nginx/certs/$DATE/$KEY;
 
     # Log files path
     access_log /var/log/nginx/$FDQN.access.log;
