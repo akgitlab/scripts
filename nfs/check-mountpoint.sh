@@ -33,10 +33,10 @@ then
       then
         $(kill -s SIGTERM $DFPID &> /dev/null)
         echo "0"
-        zabbix_sender -z $SRV -s $TRAP -k check.nfs -o 0 > /dev/null 2>&1
+        zabbix_sender -z $SRV -s $TRAP -k vfs.fs.mounted -o 0 > /dev/null 2>&1
       else
         echo "1"
-        zabbix_sender -z $SRV -s $TRAP -k check.nfs -o 1 > /dev/null 2>&1
+        zabbix_sender -z $SRV -s $TRAP -k vfs.fs.mounted -o 1 > /dev/null 2>&1
       fi
   done
 fi
