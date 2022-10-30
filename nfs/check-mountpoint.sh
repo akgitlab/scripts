@@ -10,7 +10,7 @@
 # Get user variables
 
 SRV=$(grep -v '^#' /etc/zabbix/zabbix_agentd.conf  | grep -v '^$' | grep Server= | awk -F '=' '{print $2}')
-TRAP=$(hostname -I)
+TRAP=$(hostname -I | awk '{print $1}')
 
 
 # Get Remote NFS server IP
