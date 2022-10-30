@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Monitor for NFS file system mounted
-# Andrey Kuznetsov, 2022.10.30
+# Andrey Kuznetsov, 2022.10.29
 # Telegram: https://t.me/akmsg
 
 # WARNING! Our Linux server monitoring script should be installed in the network or on the specific host where the NFS mount is running!
