@@ -7,8 +7,7 @@ use constant true  => 1;
 my %config;
 my $dbh;
 
-# If you want to run the tool in batch mode to process recordings that were
-# not processed before, you can use a bash command like the following one.
+# If you want to run the tool in batch mode to process recordings that were not processed before, you can use a bash command like the following one.
 # Be sure to su to the asterisk user before running it.
 #
 #for A in /var/spool/asterisk/monitor/q*; do fecha=`date +%Y-%m-%d -r $A`; unique=${A#*-}; uniqueid=${unique%.*}; echo "/usr/local/parselog/update_mix_mixmonitor_date.pl $uniqueid /var/spool/asterisk/monitor/$A $fecha"; done
@@ -30,7 +29,7 @@ $config{'dbname'} = 'qstats';
 $config{'dbuser'} = 'qstatsUser';
 $config{'dbpass'} = 'qstatsPassw0rd';
 
-# Destination directory for recordings
+# Temporary destination directory for converted to .mp3 recordings
 $config{'asterisk_spool'}  = "/var/spool/asterisk/monitor";
 $config{'destination_dir'} = "/var/spool/asterisk/outgoing";
 
