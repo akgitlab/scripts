@@ -217,7 +217,7 @@ if ( -d '/usr/local/parselog/plugins' ) {
 if($config{'move_recording'} == true) {
 
     my $firstletter = substr $filename, 0, 1;
-    if ($firstletter ne "q" && $firstletter ne "o" ) { print "Skip processing because first letter is $firstletter\n"; exit; }
+    if ($firstletter ne "q" && $firstletter ne "o" && $firstletter ne "i" ) { print "Skip processing because first letter is $firstletter\n"; exit; }
 
 # Set subdate destination directory
     $time = localtime(time);
