@@ -26,6 +26,7 @@ for i in `find ./ -type f -name "*.mp3"`
         # Replace from UCP Reports
         mysql --user="$dbuser" --password="$dbpass" --database="$cdrdb" --execute='UPDATE '$celtable' SET \
         appdata=REPLACE(appdata, "'$datedir'/'$file'.wav", "/mnt/nfs/monitor/'$datedir'/'$file'.mp3");';
+        # Moving records
         mv /var/spool/asterisk/outgoing/$datedir/$i /mnt/nfs/monitor/$datedir/$i
         chown -R asterisk. /var/spool/asterisk/monitor/$datedir
     fi
