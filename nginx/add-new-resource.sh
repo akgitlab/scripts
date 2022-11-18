@@ -21,8 +21,8 @@ read -r -p "Enter fully qualified domain name: " FDQN
 
 # Check for domain name availability
 echo "Domain existence check by using WhoIS service..."
-whois $FDQN | grep "No entries found" > /dev/null 2>&1
-if [ $? -eq 0 ]
+dig $FDQN +noall +answer | grep 193.169.173.65 > /dev/null 2>&1
+if [ $? -eq 1 ]
 then
   echo -e "\033[0m\033[0m\033[31mError: could not find records for this domain!"
   tput sgr0
