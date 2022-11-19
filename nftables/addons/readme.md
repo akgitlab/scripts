@@ -1,249 +1,249 @@
-# nft-geo-filter
-Allow/deny traffic in nftables using country specific IP blocks
+# nft-гео-фильтр
+Разрешить/запретить трафик в nftables, используя блоки IP для конкретной страны
 
-# Requirements
-This script requires nftables >= 0.9.0
+# Требования
+Для этого скрипта требуется nftables >= 0.9.0
 
-# Installation
-Download the script from here:
+# Монтаж
+Скачайте скрипт отсюда:
 https://raw.githubusercontent.com/rpthms/nft-geo-filter/master/nft-geo-filter
 
 # TL;DR
-Run `nft-geo-filter --table-family netdev --interface <interface_to_internet>
-XX` to block packets from the country whose ISO-3166-1 alpha-2 country code is
-XX. Replace `<interface_to_internet>` with the interface name in your system
-that's connected to the internet (Eg:- eth0).
+Запустите `nft-geo-filter --table-family netdev --interface <interface_to_internet>
+XX` для блокировки пакетов из страны, чей код страны ISO-3166-1 alpha-2
+ХХ. Замените `<interface_to_internet>` именем интерфейса в вашей системе.
+который подключен к Интернету (например: - eth0).
 
-# Description
-This script will download IPv4 or/and IPv6 blocks for the specified countries
-from one of the supported IP blocks provider and add them to sets in the
-specified table. You have to provide 2 letter ISO-3166-1 alpha-2 country codes
-of the countries you want to filter as positional arguments to this script.
+# Описание
+Этот скрипт загрузит блоки IPv4 и/или IPv6 для указанных стран.
+от одного из поддерживаемых поставщиков IP-блоков и добавить их в наборы в
+указанная таблица. Вы должны указать двухбуквенный код страны ISO-3166-1 alpha-2.
+стран, которые вы хотите отфильтровать в качестве позиционных аргументов для этого скрипта.
 
-nft-geo-filter supports 2 IP Blocks provider at this point:
+На данный момент nft-geo-filter поддерживает 2 поставщиков IP-блоков:
 
 * **ipverse.net** - http://ipverse.net/
 * **ipdeny.com** - https://www.ipdeny.com/ipblocks/
 
-You can specify which table holds the sets and the filtering rules using the
-`--table-family` and `--table-name` flags. `--table-name` specifies the name of
-the table. nft-geo-filter requires its own private table, so make sure that the
-table name that you provide is not being used by any other table in your
-ruleset. `--table-family` specifies the family of the nftables table which will
-store the filter sets and the filtering rule. The family must be one of the
-following options:
+Вы можете указать, какая таблица содержит наборы и правила фильтрации, используя
+Флаги `--table-family` и `--table-name`. `--table-name` указывает имя
+Таблица. nft-geo-filter требует свою собственную приватную таблицу, поэтому убедитесь, что
+имя таблицы, которое вы предоставляете, не используется какой-либо другой таблицей в вашем
+набор правил. `--table-family` указывает семейство таблиц nftables, которое будет
+сохранить наборы фильтров и правило фильтрации. Семья должна быть одним из
+следующие варианты:
 
 * ip
 * ip6
-* inet
-* netdev
+* инет
+* сетевой разработчик
 
-By using a separate table, this script can create it's own chains and add its
-own filtering rules without needing the admin to make any changes to their
-nftables config, like you were required to do in the previous version of this
-script. **Do not add any rules to the chains inside nft-geo-filter's private
-table**, because they will be removed when you re-run the script to update the
-filter sets.
+Используя отдельную таблицу, этот скрипт может создавать собственные цепочки и добавлять свои
+собственные правила фильтрации без необходимости внесения администратором каких-либо изменений в их
+nftables, как вы должны были сделать в предыдущей версии этого
+сценарий. **Не добавляйте никаких правил к цепочкам внутри приватной папки nft-geo-filter.
+table**, потому что они будут удалены при повторном запуске скрипта для обновления
+наборы фильтров.
 
-**The default action of this script is to block traffic** from the IP blocks of
-the provided countries and allow everything else. To invert this behaviour and
-only allow traffic from the IP blocks of the specified countries (with a few
-exceptions, see the "Allow mode exceptions" section below), use the `--allow`
-flag.
+**Действием этого скрипта по умолчанию является блокировка трафика** с IP-блоков
+предоставленные страны и разрешить все остальное. Чтобы инвертировать это поведение и
+разрешать трафик только с IP-блоков указанных стран (с небольшим
+исключения, см. раздел «Разрешить исключения режима» ниже), используйте параметр `--allow`
+флаг.
 
-Running nft-geo-filter without specifying any optional flags will end up
-creating IP sets and filtering rules to block traffic from those IPs, inside a
-table called 'geo-filter' of the 'inet' family. But **it is recommended to use
-a 'netdev' table to drop packets** much more effeciently than the other
-families.  Refer to the 'netdev' section below.
+Запуск nft-geo-filter без указания дополнительных флагов завершится
+создание наборов IP-адресов и правил фильтрации для блокировки трафика с этих IP-адресов внутри
+таблица под названием «геофильтр» семейства «инет». Но **рекомендуется использовать
+таблица 'netdev' для отбрасывания пакетов** намного эффективнее, чем другие
+семьи. См. раздел «netdev» ниже.
 
-# IPv4 or IPv6?
+# IPv4 или IPv6?
 
-The filter sets that are added to the table is determined by the table's family
-that you specify using `--table-family`:
+Наборы фильтров, добавляемые в таблицу, определяются семейством таблицы.
+которые вы указываете с помощью `--table-family`:
 
-Table Family | Filter Sets
+Семейный стол | Наборы фильтров
 -------------|------------
-ip|Only the IPv4 set
-ip6|Only the IPv6 set
-inet|Both IPv4 and IPv6 sets
-netdev|Both IPv4 and IPv6 sets by default. Use the --no-ipv6 flag to only use the IPv4 set or the --no-ipv4 flag to only use the IPv6 set.
+ip|Только набор IPv4
+ip6|Только набор IPv6
+inet|Наборы IPv4 и IPv6
+netdev|И IPv4, и IPv6 установлены по умолчанию. Используйте флаг --no-ipv6, чтобы использовать только набор IPv4, или флаг --no-ipv4, чтобы использовать только набор IPv6.
 
 # Netdev
-Using the netdev table to drop packets is more efficient than dropping them in
-the tables of other families (by a factor of 2x according to the nftables wiki:
+Использование таблицы netdev для отбрасывания пакетов более эффективно, чем их отбрасывание.
+таблицы других семейств (в 2 раза согласно вики nftables:
 https://wiki.nftables.org/wiki-nftables/index.php/Nftables_families#netdev).
-This is because the netdev rules are applied very early in the packet path (as
-soon as the NIC passes the packets to the networking stack).
+Это связано с тем, что правила netdev применяются очень рано в пути пакета (как
+как только сетевой адаптер передает пакеты в сетевой стек).
 
-To use a netdev table, you need to set the `--table-family` to `netdev` and
-provide the name of the interface that's connected to the internet by using the
-`--interface` flag. The interface is needed because netdev tables work on a
-per-interface basis.
+Чтобы использовать таблицу netdev, вам нужно установить для `--table-family` значение `netdev` и
+укажите имя интерфейса, подключенного к Интернету, с помощью
+Флаг `--interface`. Интерфейс необходим, потому что таблицы netdev работают на
+для каждого интерфейса.
 
-# Allow mode implicit exceptions
-When you use `--allow`, certain rules are automatically added along with the
-regular filtering rules to ensure that your regular traffic is not impeded.
-These rules ensure that:
+# Разрешить неявные исключения режима
+Когда вы используете `--allow`, определенные правила автоматически добавляются вместе с
+регулярные правила фильтрации, чтобы гарантировать, что ваш обычный трафик не будет затруднен.
+Эти правила гарантируют, что:
 
-1. Traffic from private IPv4 address ranges and link-local IPv6 address ranges
-are allowed to pass through.
-2. Traffic from the localhost is allowed to pass through.
-3. Non-IP traffic such as ARP is not blocked when using the netdev table.
+1. Трафик из диапазонов частных IPv4-адресов и диапазонов локальных IPv6-адресов.
+разрешают пройти.
+2. Трафик с локального хоста разрешен.
+3. Не-IP-трафик, такой как ARP, не блокируется при использовании таблицы netdev.
 
-# Allow outgoing connections to denied IPs
-In case you want to make connections to IP addresses that are being denied by
-the filtering sets, you can use the `--allow-established` flag. This will add a
-rule to the filter-chain to allow packets from all established and related
-connections (i.e the first packet of the connection should originate from your
-host). Initial packets from the denied IPs will always be denied.
+# Разрешить исходящие подключения к запрещенным IP-адресам
+Если вы хотите установить соединения с IP-адресами, которые запрещены
+наборы фильтрации, вы можете использовать флаг `--allow-installed`. Это добавит
+правило к цепочке фильтров, чтобы разрешить пакеты от всех установленных и связанных
+соединения (т.е. первый пакет соединения должен исходить от вашего
+хозяин). Первоначальные пакеты с запрещенных IP-адресов всегда будут отклонены.
 
-This flag is really handy when combined with `--allow`, which lets you limit
-the incoming connections to certain countries while letting you create outgoing
-connections to any country without any restrictions. Check the example titled
-'Only allow incoming packets from Monaco but still allow outgoing connections
-to any country' in the section below to get an idea about the
-`--allow-established` flag.
+Этот флаг очень удобен в сочетании с `--allow`, который позволяет вам ограничить
+входящие соединения с определенными странами, позволяя создавать исходящие
+подключения к любой стране без каких-либо ограничений. Проверьте пример под названием
+'Разрешить только входящие пакеты из Монако, но разрешить исходящие соединения
+в любую страну» в разделе ниже, чтобы получить представление о
+Флаг --allow-installed.
 
-# Manual exceptions
-You can create exceptions for a few IP addresses so that they pass through the
-filtering sets that were set up. To do that provide a comma separated list of
-IPs that need to be exempted from filtering to the `--exceptions` flag. This
-will create rules that would explicitly allow packets from the specified IP
-addresses, even if the filtering sets would block them. Check the "Usage
-examples" section below to see how the `--exceptions` flag can be used.
+# Ручные исключения
+Вы можете создать исключения для нескольких IP-адресов, чтобы они проходили через
+настроенные наборы фильтров. Для этого укажите разделенный запятыми список
+IP-адреса, которые необходимо исключить из фильтрации с помощью флага `--exceptions`. Этот
+создаст правила, которые явно разрешат пакеты с указанного IP
+адресов, даже если наборы фильтрации заблокируют их. Проверьте «Использование
+примеры» ниже, чтобы увидеть, как можно использовать флаг `--exceptions`.
 
-# What do I need to add to my nftables config?
-**Nothing!** Since this script creates a separate nftables table to filter your
-traffic, it will not cause your current nftables config to break. The
-"filter-chain" chain created by this script has a high priority of -190 to
-ensure that:
-* Conntrack operations happen before this script's rule matching begins
-(Connection tracking operations uses a higher priority of -200)
-* Filtering rules of this script are applied before your own
-rules (Most people won't be using a filter chain with such a high priority)
+# Что мне нужно добавить в конфигурацию nftables?
+**Ничего!** Так как этот скрипт создает отдельную таблицу nftables для фильтрации
+трафик, это не приведет к поломке вашей текущей конфигурации nftables. 
+Созданная этим скриптом цепочка "filter-chain" имеет высокий приоритет от -190 до
+обеспечить, что:
+* Операции Conntrack происходят до начала сопоставления правил этого скрипта.
+(Операции отслеживания соединения используют более высокий приоритет -200)
+* Правила фильтрации этого скрипта применяются перед вашими
+правила (большинство людей не будут использовать цепочку фильтров с таким высоким приоритетом)
 
-# Other options
-By default, nft-geo-filter uses `/usr/sbin/nft` as the path to the nft binary.
-If your distro stores nft in a different location, specify that location using
-the `--nft-location` argument.
+# Другие опции
+По умолчанию nft-geo-filter использует `/usr/sbin/nft` в качестве пути к двоичному файлу nft.
+Если ваш дистрибутив хранит nft в другом месте, укажите это место с помощью
+аргумент `--nft-location`.
 
-You can also add counters to your filtering rules to see how many packets have
-been dropped/accepted. Just add the `--counter` argument when calling the
-script.
+Вы также можете добавить счетчики в свои правила фильтрации, чтобы увидеть, сколько пакетов было отправлено.
+было отброшено/принято. Просто добавьте аргумент `--counter` при вызове
+сценарий.
 
-Filtering rules can also log the packets that are accepted or droped by them, by
-using the `--log-accept` or the `--log-drop` arguments. You can optionally provide
-a prefix to the log messages for easier identification, using the `--log-accept-prefix`,
-`--log-drop-prefix` arguments and change the log severity level from 'warn' by using
- the `--log-accept-level` and `--log-drop-level` arguments.
+Правила фильтрации также могут регистрировать принимаемые или отбрасываемые ими пакеты по
+используя аргументы --log-accept или --log-drop. Вы можете опционально предоставить
+префикс к сообщениям журнала для облегчения идентификации, используя `--log-accept-prefix`,
+`--log-drop-prefix` и измените уровень серьезности журнала с 'warn' с помощью
+ аргументы --log-accept-level и --log-drop-level.
 
-# Help text
-Run `nft-geo-filter -h` to get the following help text:
+# Текст справки
+Запустите `nft-geo-filter -h`, чтобы получить следующий текст справки:
 ```
-usage: nft-geo-filter [-h] [-v] [--version] [-l LOCATION] [-a] [--allow-established] [-c]
-                      [--provider {ipdeny.com,ipverse.net}] [-f {ip,ip6,inet,netdev}] [-n NAME]
-                      [-i INTERFACE] [--no-ipv4 | --no-ipv6] [-p] [--log-accept-prefix PREFIX]
-                      [--log-accept-level {emerg,alert,crit,err,warn,notice,info,debug}] [-o]
-                      [--log-drop-prefix PREFIX]
-                      [--log-drop-level {emerg,alert,crit,err,warn,notice,info,debug}]
-                      [-e ADDRESSES]
-                      country [country ...]
+использование: nft-geo-filter [-h] [-v] [--версия] [-l МЕСТОПОЛОЖЕНИЕ] [-a] [--разрешить-установить] [-c]
+                      [--provider {ipdeny.com,ipverse.net}] [-f {ip,ip6,inet,netdev}] [-n ИМЯ]
+                      [-i ИНТЕРФЕЙС] [--no-ipv4 | --no-ipv6] [-p] [--log-accept-prefix ПРЕФИКС]
+                      [--log-accept-level {возникновение, предупреждение, крит, ошибка, предупреждение, уведомление, информация, отладка}] [-o]
+                      [--log-drop-prefix ПРЕФИКС]
+                      [--log-drop-level {появление, оповещение, крит, ошибка, предупреждение, уведомление, информация, отладка}]
+                      [-e АДРЕСА]
+                      страна [страна ...]
 
-Filter traffic in nftables using country IP blocks
+Фильтровать трафик в nftables с помощью блоков IP страны
 
-positional arguments:
-  country               2 letter ISO-3166-1 alpha-2 country codes to allow/block. Check your IP
-                        blocks provider to find the list of supported countries.
+позиционные аргументы:
+  страна 2-буквенный код страны ISO-3166-1 alpha-2 для разрешения/блокировки. Проверьте свой IP
+                        блокирует провайдера, чтобы найти список поддерживаемых стран.
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -v, --verbose         show verbose output
-  --version             show program's version number and exit
+необязательные аргументы:
+  -h, --help показать это справочное сообщение и выйти
+  -v, --verbose показать подробный вывод
+  --version показать номер версии программы и выйти
 
-  -l LOCATION, --nft-location LOCATION
-                        Location of the nft binary. Default is /usr/sbin/nft
-  -a, --allow           By default, all the IPs in the filter sets will be denied and every other
-                        IP will be allowed to pass the filtering chain. Provide this argument to
-                        reverse this behaviour.
-  --allow-established   Allow packets from denied IPs, but only if they are a part of an
-                        established connection i.e the initial packet originated from your host.
-                        Initial packets from the denied IPs will still be dropped. This flag can
-                        be useful when using the allow mode, so that outgoing connections to
-                        addresses outside the filter set can still be made.
-  -c, --counter         Add the counter statement to the filtering rules
+  -l МЕСТОПОЛОЖЕНИЕ, --nft-location МЕСТОПОЛОЖЕНИЕ
+                        Расположение двоичного файла nft. По умолчанию /usr/sbin/nft
+  -a, --allow По умолчанию все IP-адреса в наборах фильтров будут запрещены, а все остальные
+                        IP будет разрешено проходить цепочку фильтрации. Предоставьте этот аргумент
+                        изменить это поведение.
+  --allow-installed Разрешить пакеты с запрещенных IP-адресов, но только если они являются частью
+                        установленное соединение, т. е. исходный пакет исходит от вашего хоста.
+                        Первоначальные пакеты с запрещенных IP-адресов все равно будут отброшены. Этот флаг может
+                        быть полезным при использовании режима разрешения, чтобы исходящие соединения с
+                        адреса за пределами набора фильтров все еще могут быть сделаны.
+  -c, --counter Добавить оператор counter в правила фильтрации
   --provider {ipdeny.com,ipverse.net}
-                        Specify the country IP blocks provider. Default is ipverse.net
+                        Укажите страну поставщика блокировок IP-адресов. По умолчанию используется ipverse.net.
 
-Table:
-  Provide the name and the family of the table in which the set of filtered addresses will be
-  created. This script will create a new nftables table, so make sure the provided table name
-  is unique and not being used by any other table in the ruleset. An 'inet' table called 'geo-
-  filter' will be used by default
+Стол:
+  Укажите имя и семейство таблицы, в которой будет храниться набор отфильтрованных адресов.
+  созданный. Этот сценарий создаст новую таблицу nftables, поэтому убедитесь, что указанное имя таблицы
+  уникальна и не используется ни одной другой таблицей в наборе правил. Таблица 'inet' под названием 'geo-
+  фильтр будет использоваться по умолчанию
 
   -f {ip,ip6,inet,netdev}, --table-family {ip,ip6,inet,netdev}
-                        Specify the table's family. Default is inet
-  -n NAME, --table-name NAME
-                        Specify the table's name. Default is geo-filter
+                        Укажите семейство таблицы. По умолчанию инет
+  -n ИМЯ, --table-name ИМЯ
+                        Укажите имя таблицы. По умолчанию используется геофильтр
 
-Netdev arguments:
-  If you're using a netdev table, you need to provide the name of the interface which is
-  connected to the internet because netdev tables work on a per-interface basis. You can also
-  choose to only store v4 or only store v6 addresses inside the netdev table sets by providing
-  the '--no-ipv6' or '--no-ipv4' arguments. Both v4 and v6 addresses are stored by default
+Аргументы Netdev:
+  Если вы используете таблицу netdev, вам необходимо указать имя интерфейса, который
+  подключен к Интернету, потому что таблицы netdev работают для каждого интерфейса. Вы также можете
+  выберите хранить только адреса v4 или только адреса v6 внутри наборов таблиц netdev, предоставив
+  аргументы --no-ipv6 или --no-ipv4. Адреса v4 и v6 сохраняются по умолчанию.
 
-  -i INTERFACE, --interface INTERFACE
-                        Specify the ingress interface for the netdev table
-  --no-ipv4             Don't create a set for v4 addresses in the netdev table
-  --no-ipv6             Don't create a set for v6 addresses in the netdev table
+  -i ИНТЕРФЕЙС, --interface ИНТЕРФЕЙС
+                        Укажите входной интерфейс для таблицы netdev
+  --no-ipv4 Не создавать набор для адресов v4 в таблице netdev
+  --no-ipv6 Не создавать набор для адресов v6 в таблице netdev
 
-Logging statement:
-  You can optionally add the logging statement to the filtering rules added by this script.
-  That way, you'll be able to see the IP addresses of the packets that are accepted or dropped
-  by the filtering rules in the kernel log (which can be read via the systemd journal or
-  syslog). You can also add an optional prefix to the log messages and change the log message
-  severity level.
+Заявление о регистрации:
+  При желании вы можете добавить оператор ведения журнала в правила фильтрации, добавленные этим сценарием.
+  Таким образом, вы сможете увидеть IP-адреса принятых или отброшенных пакетов.
+  по правилам фильтрации в журнале ядра (который можно прочитать через журнал systemd или
+  системный журнал). Вы также можете добавить необязательный префикс к сообщениям журнала и изменить сообщение журнала.
+  Уровень опасности.
 
-  -p, --log-accept      Add the log statement to the accept filtering rules
-  --log-accept-prefix PREFIX
-                        Add a prefix to the accept log messages for easier identification. No
-                        prefix is used by default.
-  --log-accept-level {emerg,alert,crit,err,warn,notice,info,debug}
-                        Set the accept log message severity level. Default is 'warn'.
-  -o, --log-drop        Add the log statement to the drop filtering rules
-  --log-drop-prefix PREFIX
-                        Add a prefix to the drop log messages for easier identification. No
-                        prefix is used by default.
-  --log-drop-level {emerg,alert,crit,err,warn,notice,info,debug}
-                        Set the drop log message severity level. Default is 'warn'.
+  -p, --log-accept Добавить оператор журнала в правила фильтрации принятия
+  --log-accept-prefix ПРЕФИКС
+                        Добавьте префикс к сообщениям журнала принятия для облегчения идентификации. Нет
+                        префикс используется по умолчанию.
+  --log-accept-level {появление, предупреждение, крит, ошибка, предупреждение, уведомление, информация, отладка}
+                        Установите уровень серьезности сообщения журнала принятия. По умолчанию «предупреждать».
+  -o, --log-drop Добавить оператор журнала в правила фильтрации отбрасывания
+  --log-drop-prefix ПРЕФИКС
+                        Добавьте префикс к сообщениям журнала отбрасывания для облегчения идентификации. Нет
+                        префикс используется по умолчанию.
+  --log-drop-level {возникновение, предупреждение, крит, ошибка, предупреждение, уведомление, информация, отладка}
+                        Задайте уровень серьезности сообщений журнала отбрасывания. По умолчанию «предупреждать».
 
-IP Exceptions:
-  You can add exceptions for certain IPs by passing a comma separated list of IPs or
-  subnets/prefixes to the '--exceptions' option. The IP addresses passed to this option will be
-  explicitly allowed in the filtering chain created by this script. Both IPv4 and IPv6
-  addresses can be passed. Use this option to allow a few IP addresses that would otherwise be
-  denied by your filtering sets.
+Исключения IP:
+  Вы можете добавить исключения для определенных IP-адресов, передав список IP-адресов, разделенных запятыми, или
+  подсети/префиксы к опции '--exceptions'. IP-адреса, переданные этой опции, будут
+  явно разрешено в цепочке фильтрации, созданной этим скриптом. И IPv4, и IPv6
+  адреса можно передать. Используйте эту опцию, чтобы разрешить несколько IP-адресов, которые в противном случае были бы
+  запрещены вашими фильтрующими наборами.
 
-  -e ADDRESSES, --exceptions ADDRESSES
+  -e АДРЕСА, --exceptions АДРЕСА
 ```
 
-# Usage examples
-All you have to do is run this script with the appropriate flags. There's no
-need to create a table or set manually in your nftables config for the
-filtering operation to work.  Take a look at the following examples to
-understand how the script works. I'm using the IP address blocks from Monaco in
-the following examples:
+# Примеры использования
+Все, что вам нужно сделать, это запустить этот скрипт с соответствующими флагами. Нет никаких
+необходимо создать таблицу или установить вручную в конфигурации nftables для
+операция фильтрации для работы. Взгляните на следующие примеры, чтобы
+понять, как работает скрипт. Я использую блоки IP-адресов из Монако в
+следующие примеры:
 
-* Use a netdev table to block packets from Monaco (on the enp1s0 interface)\
-  **Command to run**: `nft-geo-filter --table-family netdev --interface enp1s0 MC`\
-  **Resulting ruleset**:
+* Используйте таблицу netdev для блокировки пакетов из Монако (на интерфейсе enp1s0)\
+  **Команда для запуска**: `nft-geo-filter --table-family netdev --interface enp1s0 MC`\
+  **Результирующий набор правил**:
   ```
-  table netdev geo-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица netdev геофильтр {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -254,33 +254,33 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
-                             2a07:9080::/29,
-                             2a0b:8000::/29 }
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
+                             2а07:9080::/29,
+                             2a0b:8000::/29}
         }
 
-        chain filter-chain {
-                type filter hook ingress device "enp1s0" priority -190; policy accept;
-                ip saddr @filter-v4 drop
-                ip6 saddr @filter-v6 drop
+        цепочка фильтр-цепочка {
+                type filter hook ingress device "enp1s0" приоритет -190; политика принять;
+                ip saddr @filter-v4 падение
+                ip6 saddr @filter-v6 падение
         }
   }
   ```
 
-* Use a netdev table to only block IPv4 packets from Monaco (on the enp1s0 interface)\
-  **Command to run**: `nft-geo-filter --table-family netdev --interface enp1s0 --no-ipv6 MC`\
-  **Resulting ruleset**:
+* Используйте таблицу netdev, чтобы блокировать пакеты IPv4 только из Монако (на интерфейсе enp1s0)\
+  **Команда для запуска**: `nft-geo-filter --table-family netdev --interface enp1s0 --no-ipv6 MC`\
+  **Результирующий набор правил**:
   ```
-  table netdev geo-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица netdev геофильтр {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -291,23 +291,23 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        chain filter-chain {
-                type filter hook ingress device "enp1s0" priority -190; policy accept;
-                ip saddr @filter-v4 drop
+        цепочка фильтр-цепочка {
+                type filter hook ingress device "enp1s0" приоритет -190; политика принять;
+                ip saddr @filter-v4 падение
         }
   }
   ```
 
-* Only allow packets from Monaco using a netdev table (on the enp1s0 interface)\
-  **Command to run**: `nft-geo-filter --table-family netdev --interface enp1s0 --allow MC`\
-  **Resulting ruleset**:
+* Разрешить пакеты только из Монако, используя таблицу netdev (на интерфейсе enp1s0)\
+  **Команда для запуска**: `nft-geo-filter --table-family netdev --interface enp1s0 --allow MC`\
+  **Результирующий набор правил**:
   ```
-  table netdev geo-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица netdev геофильтр {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -318,36 +318,36 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
-                             2a07:9080::/29,
-                             2a0b:8000::/29 }
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
+                             2а07:9080::/29,
+                             2a0b:8000::/29}
         }
 
-        chain filter-chain {
-                type filter hook ingress device "enp1s0" priority -190; policy drop;
-                ip6 saddr fe80::/10 accept
-                ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept
-                meta protocol != { ip, ip6 } accept
-                ip saddr @filter-v4 accept
-                ip6 saddr @filter-v6 accept
+        цепочка фильтр-цепочка {
+                type filter hook ingress device "enp1s0" приоритет -190; падение политики;
+                ip6 саддр fe80::/10 принять
+                ip саддр {10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16} принять
+                метапротокол != {ip, ip6} принять
+                ip saddr @filter-v4 принять
+                ip6 saddr @filter-v6 принять
         }
   }
   ```
 
-* Use an ip table named 'monaco-filter' to block IPv4 packets from Monaco and count the blocked packets\
-  **Command to run**: `nft-geo-filter --table-family ip --table-name monaco-filter --counter MC`\
-  **Resulting ruleset**:
+* Используйте таблицу IP-адресов с именем «monaco-filter», чтобы блокировать пакеты IPv4 из Монако и подсчитывать заблокированные пакеты\
+  **Команда для запуска**: `nft-geo-filter --table-family ip --table-name monaco-filter --counter MC`\
+  **Результирующий набор правил**:
   ```
-  table ip monaco-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица ip monaco-filter {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -358,44 +358,44 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        chain filter-chain {
-                type filter hook prerouting priority -190; policy accept;
-                ip saddr @filter-v4 counter packets 0 bytes 0 drop
+        цепочка фильтр-цепочка {
+                type filter hook prerouting Priority -190; политика принять;
+                ip saddr @filter-v4 счетчик пакетов 0 байт 0 падение
         }
   }
   ```
 
-* Use an ip6 table named 'monaco-filter-v6' to block IPv6 packets from Monaco\
-  **Command to run**: `nft-geo-filter --table-family ip6 --table-name monaco-filter-v6 MC`\
-  **Resulting ruleset**:
+* Используйте таблицу ip6 с именем «monaco-filter-v6», чтобы блокировать пакеты IPv6 из Монако\
+  **Команда для запуска**: `nft-geo-filter --table-family ip6 --table-name monaco-filter-v6 MC`\
+  **Результирующий набор правил**:
   ```
-  table ip6 monaco-filter-v6 {
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
-                             2a07:9080::/29,
-                             2a0b:8000::/29 }
+  таблица ip6 monaco-filter-v6 {
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
+                             2а07:9080::/29,
+                             2a0b:8000::/29}
         }
 
-        chain filter-chain {
-                type filter hook prerouting priority -190; policy accept;
-                ip6 saddr @filter-v6 drop
+        цепочка фильтр-цепочка {
+                type filter hook prerouting Priority -190; политика принять;
+                ip6 saddr @filter-v6 падение
         }
   }
   ```
 
-* Only allow packets from Monaco using an inet table\
-  **Command to run**: `nft-geo-filter --allow MC`\
-  **Resulting ruleset**:
+* Разрешить пакеты из Монако только через инет-стол\
+  **Команда для запуска**: `nft-geo-filter --allow MC`\
+  **Результирующий набор правил**:
   ```
-  table inet geo-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица inet гео-фильтр {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -406,35 +406,35 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
-                             2a07:9080::/29,
-                             2a0b:8000::/29 }
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
+                             2а07:9080::/29,
+                             2a0b:8000::/29}
         }
 
-        chain filter-chain {
-                type filter hook prerouting priority -190; policy drop;
-                ip6 saddr { ::1, fe80::/10 } accept
-                ip saddr { 10.0.0.0/8, 127.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept
-                ip saddr @filter-v4 accept
-                ip6 saddr @filter-v6 accept
+        цепочка фильтр-цепочка {
+                type filter hook prerouting Priority -190; падение политики;
+                ip6 saddr { ::1, fe80::/10 } принять
+                ip саддр {10.0.0.0/8, 127.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16} принять
+                ip saddr @filter-v4 принять
+                ip6 saddr @filter-v6 принять
         }
   }
   ```
 
-* Block all packets from Monaco using an inet table (default operation)\
-  **Command to run**: `nft-geo-filter MC`\
-  **Resulting ruleset**:
+* Блокировать все пакеты из Монако с помощью таблицы inet (операция по умолчанию)\
+  **Команда для запуска**: `nft-geo-filter MC`\
+  **Результирующий набор правил**:
   ```
-  table inet geo-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица inet гео-фильтр {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -445,33 +445,33 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
-                             2a07:9080::/29,
-                             2a0b:8000::/29 }
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
+                             2а07:9080::/29,
+                             2a0b:8000::/29}
         }
 
-        chain filter-chain {
-                type filter hook prerouting priority -190; policy accept;
-                ip saddr @filter-v4 drop
-                ip6 saddr @filter-v6 drop
+        цепочка фильтр-цепочка {
+                type filter hook prerouting Priority -190; политика принять;
+                ip saddr @filter-v4 падение
+                ip6 saddr @filter-v6 падение
         }
   }
   ```
 
-* Block all packets from Monaco using an inet table named 'monaco-filter' and log the dropped packets\
-  **Command to run**: `nft-geo-filter --table-name monaco-filter --log-drop MC`\
-  **Resulting ruleset**:
+* Блокируйте все пакеты из Монако, используя таблицу в сети с именем «monaco-filter» и регистрируйте отброшенные пакеты\
+  **Команда для запуска**: `nft-geo-filter --table-name monaco-filter --log-drop MC`\
+  **Результирующий набор правил**:
   ```
-  table inet monaco-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица inet monaco-filter {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -482,33 +482,33 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
-                             2a07:9080::/29,
-                             2a0b:8000::/29 }
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
+                             2а07:9080::/29,
+                             2a0b:8000::/29}
         }
 
-        chain filter-chain {
-                type filter hook prerouting priority -190; policy accept;
-                ip saddr @filter-v4 log drop
-                ip6 saddr @filter-v6 log drop
+        цепочка фильтр-цепочка {
+                type filter hook prerouting Priority -190; политика принять;
+                ip saddr @filter-v4 сброс журнала
+                ip6 saddr @filter-v6 сброс журнала
         }
   }
   ```
 
-* Block all packets from Monaco and log them using the 'MC-Block ' log prefix and the 'info' log level\
-  **Command to run**: `nft-geo-filter --log-drop --log-drop-prefix 'MC-Block ' --log-drop-level info MC`\
-  **Resulting ruleset**:
+* Блокировать все пакеты из Монако и регистрировать их, используя префикс журнала «MC-Block» и уровень журнала «info».
+  **Команда для запуска**: `nft-geo-filter --log-drop --log-drop-prefix 'MC-Block' --log-drop-level info MC`\
+  **Результирующий набор правил**:
   ```
-  table inet geo-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица inet гео-фильтр {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -519,33 +519,33 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
-                             2a07:9080::/29,
-                             2a0b:8000::/29 }
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
+                             2а07:9080::/29,
+                             2a0b:8000::/29}
         }
 
-        chain filter-chain {
-                type filter hook prerouting priority -190; policy accept;
-                ip saddr @filter-v4 log prefix "MC-Block " level info drop
-                ip6 saddr @filter-v6 log prefix "MC-Block " level info drop
+        цепочка фильтр-цепочка {
+                type filter hook prerouting Priority -190; политика принять;
+                ip saddr @filter-v4 префикс журнала "MC-Block" информация об уровне выпадает
+                ip6 saddr @filter-v6 префикс журнала "MC-Block" уровень информации выпадает
         }
   }
   ```
 
-* Only allow packets from Monaco but create exceptions for Cloudflare's DNS service\
-  **Command to run**: `nft-geo-filter --exceptions 1.0.0.1,1.1.1.1,2606:4700:4700::1001,2606:4700:4700::1111 --allow MC`\
-  **Resulting ruleset**:
+* Разрешить пакеты только из Монако, но создать исключения для DNS-сервиса Cloudflare\
+  **Команда для запуска**: `nft-geo-filter --exceptions 1.0.0.1,1.1.1.1,2606:4700:4700::1001,2606:4700:4700::1111 --allow MC`\
+  **Результирующий набор правил**:
   ```
-  table inet geo-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица inet гео-фильтр {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -556,37 +556,37 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
-                             2a07:9080::/29,
-                             2a0b:8000::/29 }
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
+                             2а07:9080::/29,
+                             2a0b:8000::/29}
         }
 
-        chain filter-chain {
-                type filter hook prerouting priority -190; policy drop;
-                ip saddr { 1.0.0.1, 1.1.1.1 } accept
-                ip6 saddr { 2606:4700:4700::1001, 2606:4700:4700::1111 } accept
-                ip6 saddr { ::1, fe80::/10 } accept
-                ip saddr { 10.0.0.0/8, 127.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept
-                ip saddr @filter-v4 accept
-                ip6 saddr @filter-v6 accept
+        цепочка фильтр-цепочка {
+                type filter hook prerouting Priority -190; падение политики;
+                ip саддр {1.0.0.1, 1.1.1.1} принять
+                ip6 saddr { 2606:4700:4700::1001, 2606:4700:4700::1111 } принять
+                ip6 saddr { ::1, fe80::/10 } принять
+                ip саддр {10.0.0.0/8, 127.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16} принять
+                ip saddr @filter-v4 принять
+                ip6 saddr @filter-v6 принять
         }
   }
   ```
 
-* Block all packets from Monaco except the packets from `80.94.96.0/24` and `2a07:9080:100:100::/64`\
-  **Command to run**: `nft-geo-filter --exceptions 80.94.96.0/24,2a07:9080:100:100::/64 MC`\
-  **Resulting ruleset**:
+* Блокировать все пакеты из Монако, кроме пакетов с `80.94.96.0/24` и `2a07:9080:100:100::/64`\
+  **Команда для запуска**: `nft-geo-filter --exceptions 80.94.96.0/24,2a07:9080:100:100::/64 MC`\
+  **Результирующий набор правил**:
   ```
-  table inet geo-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица inet гео-фильтр {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -597,35 +597,35 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
-                             2a07:9080::/29,
-                             2a0b:8000::/29 }
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
+                             2а07:9080::/29,
+                             2a0b:8000::/29}
         }
 
-        chain filter-chain {
-                type filter hook prerouting priority -190; policy accept;
-                ip saddr { 80.94.96.0/24 } accept
-                ip6 saddr { 2a07:9080:100:100::/64 } accept
-                ip saddr @filter-v4 drop
-                ip6 saddr @filter-v6 drop
+        цепочка фильтр-цепочка {
+                type filter hook prerouting Priority -190; политика принять;
+                ip саддр {80.94.96.0/24} принять
+                ip6 саддр { 2a07:9080:100:100::/64 } принять
+                ip saddr @filter-v4 падение
+                ip6 saddr @filter-v6 падение
         }
   }
   ```
 
-* Only allow incoming packets from Monaco but still allow outgoing connections to any country\
-  **Command to run**: `nft-geo-filter --allow --allow-established MC`\
-  **Resulting ruleset**:
+* Разрешить входящие пакеты только из Монако, но разрешить исходящие соединения в любую страну\
+  **Команда для запуска**: `nft-geo-filter --allow --allow-installed MC`\
+  **Результирующий набор правил**:
   ```
-  table inet geo-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица inet гео-фильтр {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 176.114.96.0/20,
@@ -636,36 +636,36 @@ the following examples:
                              213.137.128.0/19 }
         }
 
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
-                             2a07:9080::/29,
-                             2a0b:8000::/29 }
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
+                             2а07:9080::/29,
+                             2a0b:8000::/29}
         }
 
-        chain filter-chain {
-                type filter hook prerouting priority -190; policy drop;
-                ct state established,related accept
-                ip6 saddr { ::1, fe80::/10 } accept
-                ip saddr { 10.0.0.0/8, 127.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept
-                ip saddr @filter-v4 accept
-                ip6 saddr @filter-v6 accept
+        цепочка фильтр-цепочка {
+                type filter hook prerouting Priority -190; падение политики;
+                состояние ct установлено, связанное с принятием
+                ip6 saddr { ::1, fe80::/10 } принять
+                ip саддр {10.0.0.0/8, 127.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16} принять
+                ip saddr @filter-v4 принять
+                ip6 saddr @filter-v6 принять
         }
   }
   ```
 
-* Download IP blocks from ipdeny.com instead of ipverse.net to block packets from Monaco\
-  **Command to run**: `nft-geo-filter --provider ipdeny.com MC`\
-  **Resulting ruleset**:
+* Загрузите блоки IP с ipdeny.com вместо ipverse.net, чтобы блокировать пакеты из Монако\
+  **Команда для запуска**: `nft-geo-filter --provider ipdeny.com MC`\
+  **Результирующий набор правил**:
   ```
-  table inet geo-filter {
-        set filter-v4 {
-                type ipv4_addr
-                flags interval
-                auto-merge
-                elements = { 37.44.224.0/22, 80.94.96.0/20,
+  таблица inet гео-фильтр {
+        установить фильтр-v4 {
+                введите ipv4_addr
+                интервал флагов
+                самостоятельный
+                элементы = {37.44.224.0/22, 80.94.96.0/20,
                              82.113.0.0/19, 87.238.104.0/21,
                              87.254.224.0/19, 88.209.64.0/18,
                              91.199.109.0/24, 91.213.192.0/24,
@@ -677,64 +677,64 @@ the following examples:
                              195.78.0.0/19, 213.133.72.0/21 }
         }
 
-        set filter-v6 {
-                type ipv6_addr
-                flags interval
-                auto-merge
-                elements = { 2a01:8fe0::/32,
+        установить фильтр-v6 {
+                введите ipv6_addr
+                интервал флагов
+                самостоятельный
+                элементы = { 2a01:8fe0::/32,
                              2a06:92c0::/32,
-                             2a07:9080::/29,
+                             2а07:9080::/29,
                              2a0b:8000::/29,
-                             2a0f:b980::/29 }
+                             2a0f:b980::/29}
         }
 
-        chain filter-chain {
-                type filter hook prerouting priority -190; policy accept;
-                ip saddr @filter-v4 drop
-                ip6 saddr @filter-v6 drop
+        цепочка фильтр-цепочка {
+                type filter hook prerouting Priority -190; политика принять;
+                ip saddr @filter-v4 падение
+                ip6 saddr @filter-v6 падение
         }
   }
   ```
 
-# Run nft-geo-filter as a service
-nft-geo-filter can also be run via a cronjob or a systemd timer to keep your
-filtering sets updated. When nft-geo-filter is executed, it will check if the
-target sets already exist. It they do, the script will flush the existing
-contents of the filtering sets after downloading the IP blocks and then add the
-updated IP blocks to the sets. If any changes need to be made to the filtering
-rules, the script will make them as well.
+# Запускаем nft-geo-filter как службу
+nft-geo-filter также можно запустить с помощью cronjob или системного таймера, чтобы сохранить
+обновлены наборы фильтров. Когда nft-geo-filter выполняется, он проверяет,
+наборы целей уже существуют. Если они это сделают, скрипт сбросит существующие
+содержимое наборов фильтрации после загрузки IP-блоков, а затем добавить
+обновлены IP-блоки для наборов. Если необходимо внести какие-либо изменения в фильтрацию
+правила, скрипт их тоже сделает.
 
-* Taking Monaco as an example again, to update the filtering sets in an 'ip'
-  table called 'monaco-filter' when you boot your system and then every 12
-  hours thereafter, your systemd timer and service units would look something
-  like this (provided you have stored the nft-geo-filter script in
-  /usr/local/bin):
+* Снова возьмем Монако в качестве примера, чтобы обновить наборы фильтрации в 'ip'
+  таблица под названием «monaco-filter» при загрузке системы, а затем каждые 12
+  часов после этого ваш системный таймер и сервисные единицы будут выглядеть как-то иначе.
+  вот так (при условии, что вы сохранили скрипт nft-geo-filter в
+  /usr/локальные/бен):
 
   **nft-geo-filter.timer**
   ```
-  [Unit]
+  [Ед. изм]
   Description=nftables Country Filter Timer
 
-  [Timer]
-  OnBootSec=1min
-  OnUnitActiveSec=12h
+  [Таймер]
+  OnBootSec=1мин
+  Онунитактивесек=12ч
 
-  [Install]
+  [Установить]
   WantedBy=timers.target
   ```
 
   **nft-geo-filter.service**
   ```
-  [Unit]
-  Description=nftables Country Filter
+  [Ед. изм]
+  Описание=nftables Фильтр страны
 
-  [Service]
-  Type=oneshot
+  [Обслуживание]
+  Тип = ваншот
   ExecStart=/usr/local/bin/nft-geo-filter --table-family ip --table-name monaco-filter MC
   ```
 
-* A cronjob that runs the same nft-geo-filter command provided above at 3:00 a.m.
-  every day would look like this:
+* Задание cron, которое запускает ту же команду nft-geo-filter, указанную выше, в 3:00.
+  каждый день будет выглядеть так:
   ```
   0 3 * * * /usr/local/bin/nft-geo-filter --table-family ip --table-name monaco-filter MC
   ```
