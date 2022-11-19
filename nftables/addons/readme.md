@@ -1,10 +1,10 @@
-# nft-гео-фильтр
+# Гео-фильтр
 Разрешить/запретить трафик в nftables, используя блоки IP для конкретной страны
 
 # Требования
 Для этого скрипта требуется nftables >= 0.9.0
 
-# Монтаж
+# Установка
 Скачайте скрипт отсюда:
 https://raw.githubusercontent.com/rpthms/nft-geo-filter/master/nft-geo-filter
 
