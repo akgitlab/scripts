@@ -2,7 +2,7 @@
 
 # Adding a new resource to reverce-proxy server
 
-# Andrey Kuznetsov, 2022.10.26
+# Andrey Kuznetsov, 2022.11.20
 # Telegram: https://t.me/akmsg
 
 # Get variables
@@ -21,7 +21,7 @@ read -r -p "Enter fully qualified domain name: " FDQN
 
 # Check for domain name availability
 echo "Domain existence check by using WhoIS service..."
-dig $FDQN +noall +answer | grep 193.169.173.65 > /dev/null 2>&1
+dig $FDQN +noall +answer | grep 193.169.173.78 > /dev/null 2>&1
 if [ $? -eq 1 ]
 then
   echo -e "\033[0m\033[0m\033[31mError: could not find records for this domain!"
@@ -82,7 +82,7 @@ cat <<EOF
 server {
     listen 80;
     server_name $FDQN;
-    return 301 https://$host$request_uri;
+    return 301 https://"$host$request_uri";
 }
 
 server {
@@ -95,14 +95,14 @@ server {
 
     # Log files path
     access_log /var/log/nginx/$FDQN.access.log;
-    error_log /var/log/nginx/$FDQN.error.log;
+    error_log /var/log/nginx/$FDQN.error.log warn;
 
     # Content encoding
     charset utf-8;
 
     # Proxy redirect
     location / {
-      proxy_pass http://$SRV;
+      proxy_pass https://$SRV;
       include /etc/nginx/proxy_params;
     }
 
