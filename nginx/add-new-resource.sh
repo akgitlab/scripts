@@ -2,11 +2,12 @@
 
 # Adding a new resource to reverce-proxy server
 
-# Andrey Kuznetsov, 2022.11.20
+# Andrey Kuznetsov, 2022.10.26
 # Telegram: https://t.me/akmsg
 
 # Get variables
 DATE=$(date  +%Y)
+EXTIP=$(curl eth0.me > /dev/null 2>&1)
 
 # Make sure only root can run our script
 if [[ $EUID -ne 0 ]]
@@ -20,8 +21,8 @@ fi
 read -r -p "Enter fully qualified domain name: " FDQN
 
 # Check for domain name availability
-echo "Domain existence check by using WhoIS service..."
-dig $FDQN +noall +answer | grep 193.169.173.78 > /dev/null 2>&1
+echo "Domain DNS records existence check by using DIG service..."
+dig $FDQN +noall +answer | grep $EXTIP > /dev/null 2>&1
 if [ $? -eq 1 ]
 then
   echo -e "\033[0m\033[0m\033[31mError: could not find records for this domain!"
