@@ -3,6 +3,7 @@
 # Adding a new resource to reverce-proxy server
 
 # Andrey Kuznetsov, 2022.10.26
+# Company: IT Service 5-55
 # Telegram: https://t.me/akmsg
 
 # Get variables
