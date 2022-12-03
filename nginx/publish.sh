@@ -31,7 +31,7 @@ echo "Domain DNS records existence check by using DIG service..."
 dig $FDQN +noall +answer | grep "$EXTIP" > /dev/null 2>&1
 if [ $? -eq 1 ]
 then
-  echo -e "\033[0m\033[0m\033[31mError: Current external IP address does not match the DNS entry or the entry is missing!"
+  echo -e "\033[0m\033[0m\033[31mError: Current external IP address does not match the DNS entry for $1 or the entry is missing!"
   tput sgr0
   exit 1
 else
@@ -44,7 +44,7 @@ echo "Configuration file existence check..."
 sleep 2
 if [ -f /etc/nginx/sites-available/$FDQN ]
 then
-  echo -e "\033[0m\033[0m\033[31mError: The configuration for the resource already exists!"
+  echo -e "\033[0m\033[0m\033[31mError: The configuration for the resource $1 already exists!"
   tput sgr0
   exit 1
 else
