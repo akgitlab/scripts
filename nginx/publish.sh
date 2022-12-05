@@ -2,7 +2,7 @@
 
 # New resource publication on reverce-proxy server
 
-# Andrey Kuznetsov, 2022.12.03
+# Andrey Kuznetsov, 2022.12.05
 # Company: IT Service 5-55
 # Telegram: https://t.me/akmsg
 
