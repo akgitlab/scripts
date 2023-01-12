@@ -33,20 +33,15 @@ then
         ${nft} add rule inet filter input ip saddr 10.0.22.21/32 tcp dport { 22, 80, 443, 5038, 8088, 10050 } counter accept
         ${nft} add rule inet filter input tcp dport { 22, 80, 443, 5038, 8088, 10050 } counter drop
         #-----------------sip provider input-------------------#
-        ${nft} add rule inet filter input ip saddr sip.beeline.ru udp dport 5000-5170 counter accept
-        ${nft} add rule inet filter input ip saddr sip.beeline.ru udp dport 10000-20000 counter accept
-        #------------------sip client input--------------------#
-        ${nft} add rule inet filter input ip saddr 10.0.1.0/24 udp dport 5000-5170 counter accept
-        #------------------rtp client input--------------------#
-        ${nft} add rule inet filter input ip saddr 10.0.1.0/24 udp dport 10000-20000 counter accept
+        ${nft} add rule inet filter input ip saddr 92.53.82.188 tcp dport 25 counter drop
+        ${nft} add rule inet filter input ip tcp dport 25 counter accept
         #----------------------forward-------------------------#
-        ${nft} add rule inet filter forward ct state new udp dport 10000-20000 counter accept
+        ${nft} add rule inet filter forward ct state new tcp dport 25 counter accept
         ${nft} add rule inet filter forward counter reject with icmp type host-prohibited
         #-----------------------output-------------------------#
         ${nft} add rule inet filter output counter accept
         #------------------------drop--------------------------#
-        ${nft} add rule inet filter input ct state new udp dport 5000-5170 counter drop
-        ${nft} add rule inet filter input ct state new udp dport 10000-20000 counter drop
+        ${nft} add rule inet filter input ct state new tcp dport 25 counter drop
         ${nft} add rule inet filter input counter reject with icmp type host-prohibited
 
         ${nft} -s list ruleset | tee /etc/nftables.conf > /dev/null 2>&1
