@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Nftables firewall presets for voip server
-# Andrey Kuznetsov, 2022.06.18
+# Nftables firewall presets for mail gateway server
+# Andrey Kuznetsov, 2023.01.12
 # Telegram: https://t.me/akmsg
 
 # WARNING! Carefully check all the settings, because by applying this script you can block your access to the server!
