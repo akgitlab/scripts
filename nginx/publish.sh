@@ -198,7 +198,7 @@ curl -Is https://$FDQN | head -1 | grep "200" > /dev/null 2>&1
 if [ $? -eq 1 ]
 then
   echo "$(date '+%d/%m/%Y %H:%M:%S') [error] Published resource does not give status code 200" >> $LOG
-  echo -e "\033[0m\033[0m\033[31mError: Published resource does not give status code 200! Please check the configuration file use nano /etc/nginx/sites-available/$FDQ>
+  echo -e "\033[0m\033[0m\033[31mError: Published resource does not give status code 200! Please check the configuration file use nano /etc/nginx/sites-available/$FDQN"
   tput sgr0
   exit 1
 else
