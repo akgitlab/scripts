@@ -39,6 +39,24 @@ then
   exit 1
 fi
 
+script_logo() {
+  cat << "EOF"
+________         ______  ___________         ______                                _____          _____
+___  __ \____  _____  /_ ___  /___(_)___________  /_        __________________________(_)________ __  /_
+__  /_/ /_  / / /__  __ \__  / __  / __  ___/__  __ \       __  ___/_  ___/__  ___/__  / ___  __ \_  __/
+_  ____/ / /_/ / _  /_/ /_  /  _  /  _(__  ) _  / / /       _(__  ) / /__  _  /    _  /  __  /_/ // /_
+/_/      \__,_/  /_.___/ /_/   /_/   /____/  /_/ /_/        /____/  \___/  /_/     /_/   _  .___/ \__/
+                                                                                         /_/
+EOF
+}
+
+start_script() {
+  script_logo
+  echo -e "Script for easy new resource publication on reverce-proxy server by AK"
+  sleep 4
+}
+start_script
+
 # Check domain name DNS entry
 echo "Domain DNS entry existence check by using DIG service..."
 dig $FDQN +noall +answer | grep "$EXTIP" > /dev/null 2>&1
@@ -198,7 +216,7 @@ curl -Is https://$FDQN | head -1 | grep "200" > /dev/null 2>&1
 if [ $? -eq 1 ]
 then
   echo "$(date '+%d/%m/%Y %H:%M:%S') [error] Published resource does not give status code 200" >> $LOG
-  echo -e "\033[0m\033[0m\033[31mError: Published resource does not give status code 200! Please check the configuration file use nano /etc/nginx/sites-available/$FDQN"
+  echo -e "\033[0m\033[0m\033[31mError: Published resource does not give status code 200! Please check the configuration file use nano /etc/nginx/sites-available/$FDQ>
   tput sgr0
   exit 1
 else
