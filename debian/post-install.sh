@@ -6,6 +6,7 @@
 
 # WARNING! Carefully check all the settings, because by applying this script you can block your access to the server!
 
+
 # Set messages colors
 RESET='\033[0m'
 YELLOW='\033[1;33m'
@@ -21,6 +22,25 @@ LOG="/var/log/post-install.log"
 
 # Get variables
 
+# Print script logo
+script_logo() {
+  cat << "EOF"
+________         ______  ___________         ______                                _____          _____
+___  __ \____  _____  /_ ___  /___(_)___________  /_        __________________________(_)________ __  /_
+__  /_/ /_  / / /__  __ \__  / __  / __  ___/__  __ \       __  ___/_  ___/__  ___/__  / ___  __ \_  __/
+_  ____/ / /_/ / _  /_/ /_  /  _  /  _(__  ) _  / / /       _(__  ) / /__  _  /    _  /  __  /_/ // /_
+/_/      \__,_/  /_.___/ /_/   /_/   /____/  /_/ /_/        /____/  \___/  /_/     /_/   _  .___/ \__/
+                                                                                         /_/
+EOF
+}
+
+start_script() {
+  script_logo
+  echo -e "Script for easy new packages instalation by AK"
+  sleep 3
+}
+start_script
+
 
 # Make sure only root can run our script
 if [[ $EUID -ne 0 ]]
@@ -33,7 +53,9 @@ fi
 # Start a post-install script
 echo -e "\n$(date '+%d/%m/%Y %H:%M:%S') [info] User $USER start a post-install script" >> $LOG
 
+# Set current timezone
 timedatectl set-timezone Europe/Moscow
+
 
 # Repository
 
