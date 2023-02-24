@@ -1,4 +1,6 @@
 # User shell activity audit (paste in /etc/bash.bashrc)
+# https://sys-adm.in/os/nix/808-linux-logirovanie-vvodimykh-komand-polzovatelem.html
+# 
 PREF="audit"
 RUSER=$(who | awk '{print $1}')
 IP=$(who am i | awk '{ print $5 }' | sed 's/(//g' | sed 's/)//g')
