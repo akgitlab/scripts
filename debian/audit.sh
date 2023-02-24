@@ -1,4 +1,4 @@
-# User shell activity audit
+# User shell activity audit (paste in /etc/bash.bashrc)
 PREF="audit"
 RUSER=$(who | awk '{print $1}')
 IP=$(who am i | awk '{ print $5 }' | sed 's/(//g' | sed 's/)//g')
