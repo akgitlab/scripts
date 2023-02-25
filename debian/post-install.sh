@@ -26,6 +26,8 @@ RUSER=$(who | awk '{print $1}')
 # IP address of new host
 IP=$(hostname -I)
 
+OLDNAME=$(hostname)
+
 # Path for executable
 PATH=$PATH:/sbin
 
@@ -62,7 +64,7 @@ fi
 # Get received user variables
 read -r -p "Enter a name for the server to be deployed (for example: ansible.5-55.ru): " FDQN
 hostnamectl set-hostname $FDQN
-sed -i '/${IP}/a ${IP} ${FDQN}' /etc/hosts
+sed -i -e "s/$OLDNAME/$FDQN/g" /etc/hosts
 
 
 # Start a post-install script
