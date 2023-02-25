@@ -120,6 +120,7 @@ apt update && apt -y upgrade
 
 # Install minimal required pfckages
 apt -y install sudo mc htop screen screenfetch ncdu gnupg curl wget
+apt -y install build-essential dkms linux-headers-$(uname -r)
 
 
 # Install and minimal configuration zabbix-agent
@@ -201,6 +202,5 @@ echo "local7.* /var/log/bash/user-audit.log" > /etc/rsyslog.d/user-audit.conf
 
 # Finish actions
 rm /home/$RUSER/post-install.sh
-apt -y autoremove
-apt -y clean
-sudo reboot
+apt -y autoremove && apt -y clean
+reboot
