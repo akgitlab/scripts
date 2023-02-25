@@ -32,6 +32,10 @@ OLDNAME=$(hostname)
 # Path for executable
 PATH=$PATH:/sbin
 
+
+# Clearing the screen from previously entered commands
+clear -x
+
 # Print script logo
 script_logo() {
   cat << "EOF"
@@ -161,6 +165,8 @@ curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/root/panels
 curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/users/ini > /home/$RUSER/.config/mc/ini
 curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/users/panels.ini > /home/$RUSER/.config/mc/panels.ini
 chown -R $RUSER.$RUSER /home/$RUSER/.config
+echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /root/.bashrc
+echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /home/$RUSER/.bashrc
 
 
 # Change motd banner on users logon
@@ -185,6 +191,7 @@ echo "local7.* /var/log/bash/user-audit.log" > /etc/rsyslog.d/user-audit.conf
 
 
 # Finish actions
+rm /home/$RUSER/post-install.sh
 apt -y autoremove
 apt -y clean
 sudo reboot
