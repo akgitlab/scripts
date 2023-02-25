@@ -134,6 +134,17 @@ if [ -x /usr/bin/apt-get ]; then
 fi
 
 
+# Install Graylog sidecar
+cd /tmp
+wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb
+dpkg -i graylog-sidecar-repository_1-5_all.deb
+apt update && apt install graylog-sidecar
+
+graylog-sidecar -service install
+systemctl enable graylog-sidecar
+systemctl start graylog-sidecar
+
+
 # User setup
 /sbin/usermod -aG sudo $RUSER
 echo "$RUSER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$RUSER
