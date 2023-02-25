@@ -159,9 +159,10 @@ curl https://raw.githubusercontent.com/akgitlab/files/main/graylog/sidecar/linux
 echo "$RUSER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$RUSER
 echo -en "\n# Set the TERM for xterm in the xterm configuration and that for tmux configuration\nexport TERM=xterm-256color" >> /root/.profile
 echo -en "\n# Set the TERM for xterm in the xterm configuration and that for tmux configuration\nexport TERM=xterm-256color" >> /home/$RUSER/.profile
-mkdir -p /home/$RUSER/.config/mc
+mkdir -p /root/.config/mc
 curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/root/ini > /root/.config/mc/ini
 curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/root/panels.ini > /root/.config/mc/panels.ini
+mkdir -p /home/$RUSER/.config/mc
 curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/users/ini > /home/$RUSER/.config/mc/ini
 curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/users/panels.ini > /home/$RUSER/.config/mc/panels.ini
 chown -R $RUSER.$RUSER /home/$RUSER/.config
