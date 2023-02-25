@@ -56,6 +56,17 @@ echo -e "\n$(date '+%d/%m/%Y %H:%M:%S') [info] User $USER start a post-install s
 timedatectl set-timezone Europe/Moscow
 
 
+# Add DNS servers
+(
+cat <<EOF
+# Post install script generated
+search 5-55.ru
+nameserver 10.1.1.10
+nameserver 10.216.55.230
+EOF
+) >  /etc/resolv.conf
+
+
 # Add standart debian repository
 (
 cat <<EOF
