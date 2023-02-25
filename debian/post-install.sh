@@ -181,7 +181,7 @@ EOF
 
 # Secure shell change config
 sed -i 's/^#Port .*/Port 22/' /etc/ssh/sshd_config
-sed -i 's/^#ListenAddress 0.0.0.0/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
+sed -i 's/^#AddressFamily .*/AddressFamily inet/' /etc/ssh/sshd_config
 sed -i 's/^#PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
 sed -i 's/^#PrintLastLog .*/PrintLastLog no/' /etc/ssh/sshd_config
 
