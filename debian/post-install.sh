@@ -182,7 +182,7 @@ echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /h
 
 
 # Change motd banner on users logon
-echo -e > /etc/motd
+echo -n > /etc/motd
 rm -rf /etc/update-motd.d/*
 curl https://raw.githubusercontent.com/akgitlab/scripts/main/debian/00-info.sh > /etc/update-motd.d/00-info
 chmod +x /etc/update-motd.d/00-info
