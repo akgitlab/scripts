@@ -164,7 +164,6 @@ Welcome to new system based of Debian!
 
 Attention user! Your actions can have irreversible consequences.
 This server is running in a production environment. Use a different server for testing!
-
 EOF
 ) >  /etc/update-motd.d/00-msg
 
