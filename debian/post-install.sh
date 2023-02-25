@@ -30,6 +30,7 @@ ___  __ \______________  /_      ___(_)_______________  /______ ___  /__  /
 __  /_/ /  __ \_  ___/  __/________  /__  __ \_  ___/  __/  __ `/_  /__  / 
 _  ____// /_/ /(__  )/ /_ _/_____/  / _  / / /(__  )/ /_ / /_/ /_  / _  /  
 /_/     \____//____/ \__/        /_/  /_/ /_//____/ \__/ \__,_/ /_/  /_/   
+
 EOF
 }
 
@@ -65,6 +66,15 @@ nameserver 10.1.1.10
 nameserver 10.216.55.230
 EOF
 ) >  /etc/resolv.conf
+
+# Disable IPv6 protocol
+(
+cat <<EOF
+net.ipv6.conf.all.disable_ipv6 = 1
+EOF
+) >  /etc/sysctl.d/90-disable-ipv6.conf
+
+sysctl -p -f /etc/sysctl.d/90-disable-ipv6.conf
 
 
 # Add standart debian repository
@@ -110,6 +120,58 @@ fi
 echo "devops ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/devops
 echo -en "\n# Set the TERM for xterm in the xterm configuration and that for tmux configuration\nexport TERM=xterm-256color" >> /root/.profile
 echo -en "\n# Set the TERM for xterm in the xterm configuration and that for tmux configuration\nexport TERM=xterm-256color" >> /home/devops/.profile
+
+
+# Change motd banner on users logon
+echo -e > /etc/motd
+rm -rf /etc/update-motd.d/*
+
+(
+cat <<EOF
+#!/usr/bin/env bash
+
+# OS available?
+if [ -f /etc/os-release ]; then
+    source /etc/os-release
+else
+    PRETTY_NAME="Linux"
+fi
+
+# Welcome message
+cat /etc/update-motd.d/00-msg
+printf "\n%s\n" "$(date)"
+printf "Distro: %s | Core: %s\n" "$PRETTY_NAME" "$(uname -r)"
+echo "Powered by Graylog is a leading centralized log management solution and real-time analysis..."
+echo ""
+
+# Show failed services
+systemctl list-units --state failed --type service | awk 'FNR>1' | grep failed
+echo ""
+EOF
+) >  /etc/update-motd.d/00-info
+
+chmod +x /etc/update-motd.d/00-info
+
+(
+cat <<EOF
+              ,,                                                                                               
+  .g8"""bgd `7MM                                                              mm                               
+.dP'     `M   MM                                                              MM                               
+dM'       `   MM   .gP"Ya   ,6"Yb.  `7Mb,od8     ,pP"Ybd `7M'   `MF',pP"Ybd mmMMmm   .gP"Ya  `7MMpMMMb.pMMMb.  
+MM            MM  ,M'   Yb 8)   MM    MM' "'     8I   `"   VA   ,V  8I   `"   MM    ,M'   Yb   MM    MM    MM  
+MM.           MM  8M""""""  ,pm9MM    MM         `YMMMa.    VA ,V   `YMMMa.   MM    8M""""""   MM    MM    MM  
+`Mb.     ,'   MM  YM.    , 8M   MM    MM         L.   I8     VVV    L.   I8   MM    YM.    ,   MM    MM    MM  
+  `"bmmmd'  .JMML. `Mbmmd' `Moo9^Yo..JMML.       M9mmmP'     ,V     M9mmmP'   `Mbmo  `Mbmmd' .JMML  JMML  JMML.
+                                                            ,V                                                 
+                                                         OOb"                                                  
+Welcome to new system based of Debian!
+
+Attention user! Your actions can have irreversible consequences.
+This server is running in a production environment. Use a different server for testing!
+
+EOF
+) >  /etc/update-motd.d/00-msg
+
 
 # Finish actions
 apt -y autoremove
