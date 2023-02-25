@@ -141,7 +141,7 @@ fi
 cat /etc/update-motd.d/00-msg
 printf "\n%s\n" "$(date)"
 printf "Distro: %s | Core: %s\n" "$PRETTY_NAME" "$(uname -r)"
-echo "Powered by Graylog is a leading centralized log management solution and real-time analysis..."
+echo "Powered by Debian is a distribution of Free Software and maintained and updated through the work of many users who volunteer..."
 echo ""
 
 # Show failed services
@@ -171,6 +171,13 @@ This server is running in a production environment. Use a different server for t
 
 EOF
 ) >  /etc/update-motd.d/00-msg
+
+
+# Secure shell change config
+sed -i 's/^#Port .*/Port 22/' /etc/ssh/sshd_config
+sed -i 's/^#ListenAddress .*/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
+sed -i 's/^#PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i 's/^#PrintLastLog .*/PrintLastLog no/' /etc/ssh/sshd_config
 
 
 # Finish actions
