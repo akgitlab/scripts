@@ -141,10 +141,10 @@ cd /tmp
 wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb
 dpkg -i graylog-sidecar-repository_1-5_all.deb
 apt update && apt install graylog-sidecar
-
-graylog-sidecar -service install
-systemctl enable graylog-sidecar
-systemctl start graylog-sidecar
+curl https://raw.githubusercontent.com/akgitlab/files/main/graylog/sitecar/debian/config/sidecar.yml > /etc/graylog/sidecar/sidecar.yml
+#graylog-sidecar -service install
+#systemctl enable graylog-sidecar
+#systemctl start graylog-sidecar
 
 
 # User setup
