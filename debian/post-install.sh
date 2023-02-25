@@ -20,7 +20,12 @@ GREEN='\e[32m'
 # Set logfile path
 LOG="/var/log/post-install.log"
 
-# Get variables
+# Real username
+RUSER=$(who | awk '{print $1}')
+
+# IP address of host
+IP=$(who am i | awk '{ print $5 }' | sed 's/(//g' | sed 's/)//g')
+
 
 # Print script logo
 script_logo() {
@@ -50,6 +55,12 @@ then
   tput sgr0
   exit 1
 fi
+
+
+# Get received user variables
+read -r -p "Enter a name for the server to be deployed (for example: ansible.5-55.ru): " FDQN
+hostnamectl set-hostname $FDQN
+
 
 # Start a post-install script
 echo -e "\n$(date '+%d/%m/%Y %H:%M:%S') [info] User $USER start a post-install script" >> $LOG
@@ -123,10 +134,10 @@ fi
 
 
 # User setup
-/sbin/usermod -aG sudo devops
-echo "devops ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/devops
+/sbin/usermod -aG sudo $RUSER
+echo "$RUSER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$RUSER
 echo -en "\n# Set the TERM for xterm in the xterm configuration and that for tmux configuration\nexport TERM=xterm-256color" >> /root/.profile
-echo -en "\n# Set the TERM for xterm in the xterm configuration and that for tmux configuration\nexport TERM=xterm-256color" >> /home/devops/.profile
+echo -en "\n# Set the TERM for xterm in the xterm configuration and that for tmux configuration\nexport TERM=xterm-256color" >> /home/$RUSER/.profile
 
 
 # Change motd banner on users logon
