@@ -56,16 +56,29 @@ echo -e "\n$(date '+%d/%m/%Y %H:%M:%S') [info] User $USER start a post-install s
 timedatectl set-timezone Europe/Moscow
 
 
-# Repository
+# Add standart debian repository
+(
+cat <<EOF
+# Official sources for Debian GNU/Linux 11.0.0 Bullseye
+
+deb http://deb.debian.org/debian/ bullseye main
+deb-src http://deb.debian.org/debian/ bullseye main
+
+deb http://security.debian.org/debian-security bullseye-security main contrib
+deb-src http://security.debian.org/debian-security bullseye-security main contrib
+
+deb http://deb.debian.org/debian/ bullseye-updates main contrib
+deb-src http://deb.debian.org/debian/ bullseye-updates main contrib
+EOF
+) >  /etc/apt/sources.list
 
 
-
-
-
+# Update system packages
 apt update && apt -y upgrade
 
-apt -y install sudo mc htop screen screenfetch ncdu gnupg curl wget
 
+# Install minimal required pfckages
+apt -y install sudo mc htop screen screenfetch ncdu gnupg curl wget
 
 
 # Install and minimal configuration zabbix-agent
@@ -81,8 +94,13 @@ if [ -x /usr/bin/apt-get ]; then
 fi
 
 
+# User setup
+/sbin/usermod -aG sudo devops
+echo "devops ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/devops
+echo -en "\n# Set the TERM for xterm in the xterm configuration and that for tmux configuration\nexport TERM=xterm-256color" >> /root/.profile
+echo -en "\n# Set the TERM for xterm in the xterm configuration and that for tmux configuration\nexport TERM=xterm-256color" >> /home/devops/.profile
 
-sudo apt -y autoremove
-sudo apt -y clean
-
-https://github.com/ahmetcancicek/debian-post-install/blob/main/install-sudo.sh
+# Finish actions
+apt -y autoremove
+apt -y clean
+sudo reboot
