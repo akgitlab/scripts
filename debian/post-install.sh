@@ -62,7 +62,7 @@ fi
 # Get received user variables
 read -r -p "Enter a name for the server to be deployed (for example: ansible.5-55.ru): " FDQN
 hostnamectl set-hostname $FDQN
-sed -i '/$IP/a $IP $FDQN' /etc/hosts
+sed -i '/${IP}/a ${IP} ${FDQN}' /etc/hosts
 
 
 # Start a post-install script
