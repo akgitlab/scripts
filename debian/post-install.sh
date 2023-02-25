@@ -37,7 +37,7 @@ EOF
 start_script() {
   script_logo
   echo -e "Script for easy new packages instalation by AK"
-  sleep 3
+  sleep 5
 }
 start_script
 
@@ -46,6 +46,7 @@ start_script
 if [[ $EUID -ne 0 ]]
 then
   echo -e "\033[0m\033[0m\033[31mError: This script must be run only as root or privileged user!"
+  echo -e ""
   tput sgr0
   exit 1
 fi
