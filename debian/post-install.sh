@@ -120,7 +120,9 @@ apt update && apt -y upgrade
 
 # Install minimal required pfckages
 apt -y install sudo mc htop screen screenfetch ncdu gnupg curl wget
-apt -y install build-essential dkms linux-headers-$(uname -r)
+
+# Install build-essential (uncomment if necessary)
+#apt -y install build-essential dkms linux-headers-$(uname -r)
 
 
 # Install and minimal configuration zabbix-agent
@@ -150,8 +152,8 @@ wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_
 dpkg -i graylog-sidecar-repository_1-5_all.deb
 apt update && apt install graylog-sidecar
 curl https://raw.githubusercontent.com/akgitlab/files/main/graylog/sidecar/linux/debian/config/sidecar.yml > /etc/graylog/sidecar/sidecar.yml
-#graylog-sidecar -service install
-#systemctl enable graylog-sidecar && systemctl start graylog-sidecar
+graylog-sidecar -service install
+systemctl enable graylog-sidecar && systemctl start graylog-sidecar
 
 
 # Install Filebeat
