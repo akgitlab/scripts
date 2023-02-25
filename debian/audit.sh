@@ -1,3 +1,4 @@
+
 # User shell activity audit (paste in /etc/bash.bashrc)
 # https://sys-adm.in/os/nix/808-linux-logirovanie-vvodimykh-komand-polzovatelem.html
 # 
