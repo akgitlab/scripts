@@ -23,8 +23,8 @@ LOG="/var/log/post-install.log"
 # Real username
 RUSER=$(who | awk '{print $1}')
 
-# IP address of host
-IP=$(who am i | awk '{ print $5 }' | sed 's/(//g' | sed 's/)//g')
+# IP address of new host
+IP=$(hostname -I)
 
 
 # Print script logo
