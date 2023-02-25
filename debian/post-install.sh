@@ -173,6 +173,7 @@ mkdir -p /home/$RUSER/.config/mc
 curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/users/ini > /home/$RUSER/.config/mc/ini
 curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/users/panels.ini > /home/$RUSER/.config/mc/panels.ini
 chown -R $RUSER.$RUSER /home/$RUSER/.config
+sed -i -e "s/devops/$RUSER/g" /home/$RUSER/.config/mc/panels.ini
 echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /root/.bashrc
 echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /home/$RUSER/.bashrc
 
