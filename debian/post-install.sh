@@ -131,41 +131,9 @@ echo -en "\n# Set the TERM for xterm in the xterm configuration and that for tmu
 # Change motd banner on users logon
 echo -e > /etc/motd
 rm -rf /etc/update-motd.d/*
-
-(
-cat <<EOF
-#!/usr/bin/env bash
-
-# OS available?
-if [ -f /etc/os-release ]; then
-    source /etc/os-release
-else
-    PRETTY_NAME="Linux"
-fi
-
-# Welcome message
-cat /etc/update-motd.d/00-msg
-printf "\n%s\n" "$(date)"
-printf "Distro: %s | Core: %s\n" "$PRETTY_NAME" "$(uname -r)"
-echo "Powered by Debian is a distribution of Free Software and maintained and updated through the work of many users who volunteer..."
-echo ""
-
-# Show failed services
-systemctl list-units --state failed --type service | awk 'FNR>1' | grep failed
-echo ""
-EOF
-) >  /etc/update-motd.d/00-info
-
+curl https://raw.githubusercontent.com/akgitlab/scripts/main/debian/00-info.sh > /etc/update-motd.d/00-info
 chmod +x /etc/update-motd.d/00-info
-
-(
-cat <<EOF
-Welcome to new system based of Debian!
-
-Attention user! Your actions can have irreversible consequences.
-This server is running in a production environment. Use a different server for testing!
-EOF
-) >  /etc/update-motd.d/00-msg
+curl https://raw.githubusercontent.com/akgitlab/scripts/main/debian/00-msg > /etc/update-motd.d/00-msg
 
 
 # Secure shell change config
