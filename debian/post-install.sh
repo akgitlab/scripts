@@ -26,6 +26,7 @@ RUSER=$(who | awk '{print $1}')
 # IP address of new host
 IP=$(hostname -I)
 
+# Old hostname
 OLDNAME=$(hostname)
 
 # Path for executable
