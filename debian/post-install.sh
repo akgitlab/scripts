@@ -74,8 +74,6 @@ net.ipv6.conf.all.disable_ipv6 = 1
 EOF
 ) >  /etc/sysctl.d/90-disable-ipv6.conf
 
-sysctl -p -f /etc/sysctl.d/90-disable-ipv6.conf
-
 
 # Add standart debian repository
 (
@@ -110,6 +108,14 @@ if [ -x /usr/bin/apt-get ]; then
   apt update
   apt-get -y install zabbix-agent
   sed -i 's/Server=127.0.0.1/Server=10.0.22.21/' /etc/zabbix/zabbix_agentd.conf
+  sed -i '/### Option: LogRemoteCommands/i AllowKey=system.run[*]' /etc/zabbix/zabbix_agentd.conf
+  sed -i '/### Option: LogRemoteCommands/{x;p;x;}' /etc/zabbix/zabbix_agentd.conf
+  sed -i '/# ListenIP=0.0.0.0/a ListenIP=0.0.0.0' /etc/zabbix/zabbix_agentd.conf
+  sed -i '/# ListenIP=0.0.0.0/G' /etc/zabbix/zabbix_agentd.conf
+  sed -i '/# Timeout=3/a Timeout=30' /etc/zabbix/zabbix_agentd.conf
+  sed -i '/# Timeout=3/G' /etc/zabbix/zabbix_agentd.conf
+  sed -i '/# UnsafeUserParameters=0/a UnsafeUserParameters=1' /etc/zabbix/zabbix_agentd.conf
+  sed -i '/# UnsafeUserParameters=0/G' /etc/zabbix/zabbix_agentd.conf
   systemctl restart zabbix-agent
   systemctl enable zabbix-agent
 fi
