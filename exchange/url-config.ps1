@@ -9,6 +9,7 @@
 
 # Change line 1, 2
 
+$servername = "ex01"
 $internal = "mail.example.com"
 $external = "ex01.example.local"
 
