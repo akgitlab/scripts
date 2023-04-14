@@ -10,6 +10,11 @@
 # Change wariables
 $external = "mail.example.com"
 
+# Checking for administrative rights
+#requires -version 4.0
+#requires -RunAsAdministrator
+Write-Host "PowerShell is run as administrator. Continue execution..." -ForegroundColor Green
+
 # Configure URL for Outlook Autodiscover
 Get-ClientAccessService -Identity $env:computername | Set-ClientAccessService -AutoDiscoverServiceExternalUri "https://$external/Autodiscover/Autodiscover.xml"
 
