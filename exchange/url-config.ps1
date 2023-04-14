@@ -9,36 +9,35 @@
 
 # Change wariables in line 1, 2, 3
 
-$servername = "ex01"
 $internal = "mail.example.com"
 $external = "ex01.example.local"
 
 # Configure URL for Outlook Autodiscover
-Get-ClientAccessService -Identity $servername | Set-ClientAccessService -AutoDiscoverServiceInternalUri "https://$internal/Autodiscover/Autodiscover.xml" -AutoDiscoverServiceExternalUri "https://$external/Autodiscover/Autodiscover.xml"
+Get-ClientAccessService -Identity $env:computername | Set-ClientAccessService -AutoDiscoverServiceInternalUri "https://$internal/Autodiscover/Autodiscover.xml" -AutoDiscoverServiceExternalUri "https://$external/Autodiscover/Autodiscover.xml"
 
 # Configure URL for ActiveSync
-Get-ActiveSyncVirtualDirectory -Server $servername | Set-ActiveSyncVirtualDirectory -ExternalUrl "https://$external/Microsoft-Server-ActiveSync" -InternalUrl "https://$internal/Microsoft-Server-ActiveSync"
+Get-ActiveSyncVirtualDirectory -Server $env:computername | Set-ActiveSyncVirtualDirectory -ExternalUrl "https://$external/Microsoft-Server-ActiveSync" -InternalUrl "https://$internal/Microsoft-Server-ActiveSync"
 
 # Configure URL for MAPI
-Get-MapiVirtualDirectory -Server $servername | Set-MapiVirtualDirectory -ExternalUrl "https://$external/mapi" -InternalUrl "https://$internal/mapi"
+Get-MapiVirtualDirectory -Server $env:computername | Set-MapiVirtualDirectory -ExternalUrl "https://$external/mapi" -InternalUrl "https://$internal/mapi"
 
 # Configure URL for Exchange Control Panel
-Get-EcpVirtualDirectory -Server $servername | Set-EcpVirtualDirectory -ExternalUrl "https://$external/ecp" -InternalUrl "https://$internal/ecp"
+Get-EcpVirtualDirectory -Server $env:computername | Set-EcpVirtualDirectory -ExternalUrl "https://$external/ecp" -InternalUrl "https://$internal/ecp"
 
 # Configure URL for Outlook Web Access
-Get-OwaVirtualDirectory -Server $servername | Set-OwaVirtualDirectory -ExternalUrl "https://$external/owa" -InternalUrl "https://$internal/owa"
+Get-OwaVirtualDirectory -Server $env:computername | Set-OwaVirtualDirectory -ExternalUrl "https://$external/owa" -InternalUrl "https://$internal/owa"
 
 # Configure URL for Offline Address Book
-Get-OabVirtualDirectory -Server $servername | Set-OabVirtualDirectory -ExternalUrl "https://$external/OAB" -InternalUrl "https://$internal/OAB"
+Get-OabVirtualDirectory -Server $env:computername | Set-OabVirtualDirectory -ExternalUrl "https://$external/OAB" -InternalUrl "https://$internal/OAB"
 
 # Configure URL for PowerShell
-Get-PowerShellVirtualDirectory -Server $servername | Set-PowerShellVirtualDirectory -ExternalUrl "https://$external/powershell" -InternalUrl "https://$internal/powershell"
+Get-PowerShellVirtualDirectory -Server $env:computername | Set-PowerShellVirtualDirectory -ExternalUrl "https://$external/powershell" -InternalUrl "https://$internal/powershell"
 
 # Configure URL for Exchange Web Services
-Get-WebServicesVirtualDirectory -Server $servername | Set-WebServicesVirtualDirectory -ExternalUrl "https://$external/EWS/Exchange.asmx" -InternalUrl "https://$internal/EWS/Exchange.asmx"
+Get-WebServicesVirtualDirectory -Server $env:computername | Set-WebServicesVirtualDirectory -ExternalUrl "https://$external/EWS/Exchange.asmx" -InternalUrl "https://$internal/EWS/Exchange.asmx"
 
 # Configure URL for Outlook Anywhere
-Get-OutlookAnywhere -Server $servername | Set-OutlookAnywhere -ExternalHostname "$external" -InternalHostname "$internal" -ExternalClientsRequireSsl $true -InternalClientsRequireSsl $true -DefaultAuthenticationMethod NTLM -Confirm:$false
+Get-OutlookAnywhere -Server $env:computername | Set-OutlookAnywhere -ExternalHostname "$external" -InternalHostname "$internal" -ExternalClientsRequireSsl $true -InternalClientsRequireSsl $true -DefaultAuthenticationMethod NTLM -Confirm:$false
 
 # Restart IIS service
 iisreset
