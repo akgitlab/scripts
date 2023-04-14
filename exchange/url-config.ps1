@@ -39,3 +39,6 @@ Get-WebServicesVirtualDirectory -Server $servername | Set-WebServicesVirtualDire
 
 # Configure URL for Outlook Anywhere
 Get-OutlookAnywhere -Server $servername | Set-OutlookAnywhere -ExternalHostname "$external" -InternalHostname "$internal" -ExternalClientsRequireSsl $true -InternalClientsRequireSsl $true -DefaultAuthenticationMethod NTLM
+
+# Restart IIS service
+iisreset
