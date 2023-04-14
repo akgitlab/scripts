@@ -38,7 +38,7 @@ Get-PowerShellVirtualDirectory -Server $servername | Set-PowerShellVirtualDirect
 Get-WebServicesVirtualDirectory -Server $servername | Set-WebServicesVirtualDirectory -ExternalUrl "https://$external/EWS/Exchange.asmx" -InternalUrl "https://$internal/EWS/Exchange.asmx"
 
 # Configure URL for Outlook Anywhere
-Get-OutlookAnywhere -Server $servername | Set-OutlookAnywhere -ExternalHostname "$external" -InternalHostname "$internal" -ExternalClientsRequireSsl $true -InternalClientsRequireSsl $true -DefaultAuthenticationMethod NTLM
+Get-OutlookAnywhere -Server $servername | Set-OutlookAnywhere -ExternalHostname "$external" -InternalHostname "$internal" -ExternalClientsRequireSsl $true -InternalClientsRequireSsl $true -DefaultAuthenticationMethod NTLM -Confirm:$false
 
 # Restart IIS service
 iisreset
