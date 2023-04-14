@@ -1,13 +1,13 @@
 # A faster way to set all the internal and external URLs is with the Set-ExchangeURLs.ps1 PowerShell script.
-# Save the script on the Exchange Server C:\scripts folder. If you don’t have a scripts folder, create one.
+# Save the script on the Exchange Server C:\Scripts folder. If you don’t have a scripts folder, create one.
 
 # Ensure that the file is unblocked to prevent any errors when running the script.
 # Read more in the article Not digitally signed error when running PowerShell script.
 
-# Another option is to copy and paste the below code into Notepad.
-# Give it the name Set-ExchangeURLs.ps1 and place it in the C:\scripts folder.
+# © Andrey Kuznetsov, 2023.04.14
+# Telegram: https://t.me/akmsg
 
-# Change line 1, 2
+# Change wariables in line 1, 2, 3
 
 $servername = "ex01"
 $internal = "mail.example.com"
