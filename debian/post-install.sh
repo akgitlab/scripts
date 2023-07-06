@@ -84,8 +84,8 @@ timedatectl set-timezone Europe/Moscow
 cat <<EOF
 # Post install script generated
 search 5-55.ru
-nameserver 10.1.1.10
-nameserver 10.216.55.230
+nameserver 192.168.22.2
+nameserver 192.168.44.2
 EOF
 ) >  /etc/resolv.conf
 
