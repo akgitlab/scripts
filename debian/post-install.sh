@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# After install script for debian server
+# Post-install script for debian server
 # Andrey Kuznetsov, 2023.02.21
 # Telegram: https://t.me/akmsg
 
