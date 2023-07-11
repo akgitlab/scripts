@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Post-install script for debian server
+# Post-install script for Debian server
 # Andrey Kuznetsov, 2023.02.21
 # Telegram: https://t.me/akmsg
 
@@ -78,7 +78,6 @@ echo -e "\n$(date '+%d/%m/%Y %H:%M:%S') [info] User $USER start a post-install s
 # Set current timezone
 timedatectl set-timezone Europe/Moscow
 
-
 # Add DNS servers
 (
 cat <<EOF
@@ -96,7 +95,6 @@ net.ipv6.conf.all.disable_ipv6 = 1
 EOF
 ) >  /etc/sysctl.d/90-disable-ipv6.conf
 
-
 # Add standart debian repository
 (
 cat <<EOF
@@ -113,17 +111,14 @@ deb-src http://deb.debian.org/debian/ bullseye-updates main contrib
 EOF
 ) >  /etc/apt/sources.list
 
-
 # Update system packages
 apt update && apt -y upgrade
-
 
 # Install minimal required pfckages
 apt -y install sudo mc htop screen screenfetch ncdu gnupg curl wget
 
 # Install build-essential (uncomment if necessary)
 #apt -y install build-essential dkms linux-headers-$(uname -r)
-
 
 # Install and minimal configuration zabbix-agent
 if [ -x /usr/bin/apt-get ]; then
@@ -145,7 +140,6 @@ if [ -x /usr/bin/apt-get ]; then
   systemctl enable zabbix-agent
 fi
 
-
 # Install Graylog sidecar
 cd /tmp
 wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb
@@ -155,14 +149,12 @@ curl https://raw.githubusercontent.com/akgitlab/files/main/graylog/sidecar/linux
 graylog-sidecar -service install
 systemctl enable graylog-sidecar && systemctl start graylog-sidecar
 
-
 # Install Filebeat
 cd /tmp
 wget https://github.com/akgitlab/files/releases/download/filebeat/filebeat-8.6.2-amd64.deb
 dpkg -i filebeat-8.6.2-amd64.deb
 apt install filebeat
 systemctl enable filebeat && systemctl start filebeat
-
 
 # User setup
 /sbin/usermod -aG sudo $RUSER
@@ -180,7 +172,6 @@ sed -i -e "s/devops/$RUSER/g" /home/$RUSER/.config/mc/panels.ini
 echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /root/.bashrc
 echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /home/$RUSER/.bashrc
 
-
 # Change motd banner on users logon
 echo -n > /etc/motd
 rm -rf /etc/update-motd.d/*
@@ -188,19 +179,16 @@ curl https://raw.githubusercontent.com/akgitlab/scripts/main/debian/00-info.sh >
 chmod +x /etc/update-motd.d/00-info
 curl https://raw.githubusercontent.com/akgitlab/scripts/main/debian/00-msg > /etc/update-motd.d/00-msg
 
-
 # Secure shell change config
 sed -i 's/^#Port .*/Port 22/' /etc/ssh/sshd_config
 sed -i 's/^#AddressFamily .*/AddressFamily inet/' /etc/ssh/sshd_config
 sed -i 's/^#PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
 sed -i 's/^#PrintLastLog .*/PrintLastLog no/' /etc/ssh/sshd_config
 
-
-# User audit
+# Enable user audit
 curl https://raw.githubusercontent.com/akgitlab/scripts/main/debian/user-audit.sh >> /etc/bash.bashrc
 mkdir /var/log/bash
 echo "local7.* /var/log/bash/user-audit.log" > /etc/rsyslog.d/user-audit.conf
-
 
 # Finish actions
 rm /home/$RUSER/post-install.sh
