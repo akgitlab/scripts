@@ -55,8 +55,7 @@ start_script() {
 }
 start_script
 
-
-# Make sure only root can run our script
+# User privilege check
 if [[ $EUID -ne 0 ]]
 then
   echo -e "\033[0m\033[0m\033[31mError: This script must be run only as root or privileged user!"
@@ -65,12 +64,10 @@ then
   exit 1
 fi
 
-
 # Get received user variables
 read -r -p "Enter a name for the server to be deployed (for example: ansible.5-55.ru): " FDQN
 hostnamectl set-hostname $FDQN
 sed -i -e "s/$OLDNAME/$FDQN/g" /etc/hosts
-
 
 # Start a post-install script
 echo -e "\n$(date '+%d/%m/%Y %H:%M:%S') [info] User $USER start a post-install script" >> $LOG
