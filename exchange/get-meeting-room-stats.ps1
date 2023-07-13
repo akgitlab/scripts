@@ -1,12 +1,13 @@
-# Script:	Get-MeetingRoomStats.ps1
-# Purpose:	Gather statistics regarding meeting room usage
-# Author:	Nuno Mota
-# E-mail:   nuno.filipe.mota@gmail.com
-# Date:		May 2017
-# Version:	0.1
-#           0.2 - 201712 - Added support for Exchange Online (Office 365)
-#			0.3 - 201911 - Added "-All" switch to automatically process all meeting rooms in the environment
-
+# Script: Get-MeetingRoomStats.ps1
+# Purpose: Gather statistics regarding meeting room usage
+# Author: Nuno Mota
+# E-mail: nuno.filipe.mota@gmail.com
+# Date:	May 2017
+# Version: 0.1
+#          0.2 - 201712 - Added support for Exchange Online (Office 365)
+#	   0.3 - 201911 - Added "-All" switch to automatically process all meeting rooms in the environment
+#
+# https://letsexchange.blogspot.com/2017/05/exchange-meeting-room-statistics.html
 
 
 <#
