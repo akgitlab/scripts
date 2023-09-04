@@ -9,9 +9,8 @@
 WINEPRFX="${HOME}/.wine"
 NEED_EXT="bmp gif png jpg jpeg svg pdf tif tiff rtf doc docx xls xlsx odt ods vsd zip rar 7z eml"
 output="REGEDIT4"$'\n'$'\n'
-# end variables
 
-# Check
+# Check Wine directory
 if [ ! -d "${WINEPRFX}" ]; then
     echo "Не существует такого WINE префикса ${WINEPRFX}"
     exit
