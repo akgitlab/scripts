@@ -76,14 +76,14 @@ echo -e "\n$(date '+%d/%m/%Y %H:%M:%S') [info] User $USER start a post-install s
 timedatectl set-timezone Europe/Moscow
 
 # Add DNS servers
-(
-cat <<EOF
+#(
+#cat <<EOF
 # Post install script generated
-search 5-55.ru
-nameserver 192.168.22.2
-nameserver 192.168.44.2
-EOF
-) >  /etc/resolv.conf
+#search 5-55.ru
+#nameserver 192.168.22.2
+#nameserver 192.168.44.2
+#EOF
+#) >  /etc/resolv.conf
 
 # Disable IPv6 protocol
 (
