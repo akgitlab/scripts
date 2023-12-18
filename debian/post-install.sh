@@ -76,14 +76,14 @@ echo -e "\n$(date '+%d/%m/%Y %H:%M:%S') [info] User $USER start a post-install s
 timedatectl set-timezone Europe/Moscow
 
 # Add DNS servers
-#(
-#cat <<EOF
+(
+cat <<EOF
 # Post install script generated
-#search 5-55.ru
-#nameserver 192.168.22.2
-#nameserver 192.168.44.2
-#EOF
-#) >  /etc/resolv.conf
+search 5-55.ru
+nameserver 192.168.22.2
+nameserver 192.168.44.2
+EOF
+) >  /etc/resolv.conf
 
 # Disable IPv6 protocol
 (
@@ -138,20 +138,20 @@ if [ -x /usr/bin/apt-get ]; then
 fi
 
 # Install Graylog sidecar
-#cd /tmp
-#wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb
-#dpkg -i graylog-sidecar-repository_1-5_all.deb
-#apt update && apt install graylog-sidecar
-#curl https://raw.githubusercontent.com/akgitlab/files/main/graylog/sidecar/linux/debian/config/sidecar.yml > /etc/graylog/sidecar/sidecar.yml
-#graylog-sidecar -service install
-#systemctl enable graylog-sidecar && systemctl start graylog-sidecar
+cd /tmp
+wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb
+dpkg -i graylog-sidecar-repository_1-5_all.deb
+apt update && apt install graylog-sidecar
+curl https://raw.githubusercontent.com/akgitlab/files/main/graylog/sidecar/linux/debian/config/sidecar.yml > /etc/graylog/sidecar/sidecar.yml
+graylog-sidecar -service install
+systemctl enable graylog-sidecar && systemctl start graylog-sidecar
 
 # Install Filebeat
-#cd /tmp
-#wget https://github.com/akgitlab/files/releases/download/filebeat/filebeat-8.6.2-amd64.deb
-#dpkg -i filebeat-8.6.2-amd64.deb
-#apt install filebeat
-#systemctl enable filebeat && systemctl start filebeat
+cd /tmp
+wget https://github.com/akgitlab/files/releases/download/filebeat/filebeat-8.6.2-amd64.deb
+dpkg -i filebeat-8.6.2-amd64.deb
+apt install filebeat
+systemctl enable filebeat && systemctl start filebeat
 
 # User setup
 /sbin/usermod -aG sudo $RUSER
