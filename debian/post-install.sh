@@ -92,19 +92,35 @@ net.ipv6.conf.all.disable_ipv6 = 1
 EOF
 ) >  /etc/sysctl.d/90-disable-ipv6.conf
 
-# Add standart debian repository
-(
-cat <<EOF
+# Add standart debian 11 repository
+#(
+#cat <<EOF
 # Official sources for Debian GNU/Linux 11.0.0 Bullseye
 
-deb http://deb.debian.org/debian/ bullseye main
-deb-src http://deb.debian.org/debian/ bullseye main
+#deb http://deb.debian.org/debian/ bullseye main
+#deb-src http://deb.debian.org/debian/ bullseye main
 
-deb http://security.debian.org/debian-security bullseye-security main contrib
-deb-src http://security.debian.org/debian-security bullseye-security main contrib
+#deb http://security.debian.org/debian-security bullseye-security main contrib
+#deb-src http://security.debian.org/debian-security bullseye-security main contrib
 
-deb http://deb.debian.org/debian/ bullseye-updates main contrib
-deb-src http://deb.debian.org/debian/ bullseye-updates main contrib
+#deb http://deb.debian.org/debian/ bullseye-updates main contrib
+#deb-src http://deb.debian.org/debian/ bullseye-updates main contrib
+#EOF
+#) >  /etc/apt/sources.list
+
+# Add standart debian 11 repository
+(
+cat <<EOF
+# Official sources for Debian GNU/Linux 12.0.0 Bookworm
+
+deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+
+deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
+
+deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
 EOF
 ) >  /etc/apt/sources.list
 
