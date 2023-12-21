@@ -136,8 +136,10 @@ apt -y install sudo mc htop screen screenfetch ncdu gnupg curl wget net-tools
 # Install and minimal configuration zabbix-agent
 if [ -x /usr/bin/apt-get ]; then
   cd /tmp
-  wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-4%2Bdebian11_all.deb
-  dpkg -i zabbix-release_6.0-4+debian11_all.deb
+#  wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-4%2Bdebian11_all.deb
+#  dpkg -i zabbix-release_6.0-4+debian11_all.deb
+  wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-5+debian12_all.deb
+  dpkg -i zabbix-release_6.0-5+debian12_all.deb
   apt update
   apt-get -y install zabbix-agent
   sed -i 's/Server=127.0.0.1/Server=10.0.22.21/' /etc/zabbix/zabbix_agentd.conf
