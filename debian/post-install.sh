@@ -93,36 +93,36 @@ EOF
 ) >  /etc/sysctl.d/90-disable-ipv6.conf
 
 # Add standart debian 11 repository
-#(
-#cat <<EOF
-# Official sources for Debian GNU/Linux 11.0.0 Bullseye
-
-#deb http://deb.debian.org/debian/ bullseye main
-#deb-src http://deb.debian.org/debian/ bullseye main
-
-#deb http://security.debian.org/debian-security bullseye-security main contrib
-#deb-src http://security.debian.org/debian-security bullseye-security main contrib
-
-#deb http://deb.debian.org/debian/ bullseye-updates main contrib
-#deb-src http://deb.debian.org/debian/ bullseye-updates main contrib
-#EOF
-#) >  /etc/apt/sources.list
-
-# Add standart debian 11 repository
 (
 cat <<EOF
-# Official sources for Debian GNU/Linux 12.0.0 Bookworm
+# Official sources for Debian GNU/Linux 11.0.0 Bullseye
 
-deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian/ bullseye main
+deb-src http://deb.debian.org/debian/ bullseye main
 
-deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
+deb http://security.debian.org/debian-security bullseye-security main contrib
+deb-src http://security.debian.org/debian-security bullseye-security main contrib
 
-deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian/ bullseye-updates main contrib
+deb-src http://deb.debian.org/debian/ bullseye-updates main contrib
 EOF
 ) >  /etc/apt/sources.list
+
+# Add standart debian 11 repository
+#(
+#cat <<EOF
+# Official sources for Debian GNU/Linux 12.0.0 Bookworm
+
+#deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+#deb-src http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+
+#deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
+#deb-src http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
+
+#deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+#deb-src http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+#EOF
+#) >  /etc/apt/sources.list
 
 # Update system packages
 apt update && apt -y upgrade
@@ -136,10 +136,10 @@ apt -y install sudo mc htop screen screenfetch ncdu gnupg curl wget net-tools
 # Install and minimal configuration zabbix-agent
 if [ -x /usr/bin/apt-get ]; then
   cd /tmp
-#  wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-4%2Bdebian11_all.deb
-#  dpkg -i zabbix-release_6.0-4+debian11_all.deb
-  wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-5+debian12_all.deb
-  dpkg -i zabbix-release_6.0-5+debian12_all.deb
+  wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-4%2Bdebian11_all.deb
+  dpkg -i zabbix-release_6.0-4+debian11_all.deb
+#  wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-5+debian12_all.deb
+#  dpkg -i zabbix-release_6.0-5+debian12_all.deb
   apt update
   apt-get -y install zabbix-agent
   sed -i 's/Server=127.0.0.1/Server=10.0.22.21/' /etc/zabbix/zabbix_agentd.conf
@@ -156,20 +156,20 @@ if [ -x /usr/bin/apt-get ]; then
 fi
 
 # Install Graylog sidecar
-#cd /tmp
-#wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb
-#dpkg -i graylog-sidecar-repository_1-5_all.deb
-#apt update && apt install graylog-sidecar
-#curl https://raw.githubusercontent.com/akgitlab/files/main/graylog/sidecar/linux/debian/config/sidecar.yml > /etc/graylog/sidecar/sidecar.yml
-#graylog-sidecar -service install
-#systemctl enable graylog-sidecar && systemctl start graylog-sidecar
+cd /tmp
+wget https://packages.graylog2.org/repo/packages/graylog-sidecar-repository_1-5_all.deb
+dpkg -i graylog-sidecar-repository_1-5_all.deb
+apt update && apt install graylog-sidecar
+curl https://raw.githubusercontent.com/akgitlab/files/main/graylog/sidecar/linux/debian/config/sidecar.yml > /etc/graylog/sidecar/sidecar.yml
+graylog-sidecar -service install
+systemctl enable graylog-sidecar && systemctl start graylog-sidecar
 
 # Install Filebeat
-#cd /tmp
-#wget https://github.com/akgitlab/files/releases/download/filebeat/filebeat-8.6.2-amd64.deb
-#dpkg -i filebeat-8.6.2-amd64.deb
-#apt install filebeat
-#systemctl enable filebeat && systemctl start filebeat
+cd /tmp
+wget https://github.com/akgitlab/files/releases/download/filebeat/filebeat-8.6.2-amd64.deb
+dpkg -i filebeat-8.6.2-amd64.deb
+apt install filebeat
+systemctl enable filebeat && systemctl start filebeat
 
 # User setup
 /sbin/usermod -aG sudo $RUSER
@@ -182,7 +182,7 @@ curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/root/panels
 mkdir -p /home/$RUSER/.config/mc
 curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/users/ini > /home/$RUSER/.config/mc/ini
 curl https://raw.githubusercontent.com/akgitlab/files/main/config/mc/users/panels.ini > /home/$RUSER/.config/mc/panels.ini
-chown -R $RUSER.$RUSER /home/$RUSER/.config
+chown -R $RUSER:$RUSER /home/$RUSER/.config
 sed -i -e "s/devops/$RUSER/g" /home/$RUSER/.config/mc/panels.ini
 echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /root/.bashrc
 echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /home/$RUSER/.bashrc
