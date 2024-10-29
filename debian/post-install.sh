@@ -169,6 +169,12 @@ sed -i -e "s/devops/$RUSER/g" /home/$RUSER/.config/mc/panels.ini
 echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /root/.bashrc
 echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /home/$RUSER/.bashrc
 
+# History settings
+export HISTSIZE=10000
+export HISTTIMEFORMAT="%h %d %H:%M:%S "
+PROMPT_COMMAND='history -a'
+export HISTIGNORE="ls:ll:history:w:htop:pwd"
+
 # Change motd banner on users logon
 echo -n > /etc/motd
 rm -rf /etc/update-motd.d/*
