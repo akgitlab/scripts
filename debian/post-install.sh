@@ -128,7 +128,7 @@ EOF
 apt update && apt -y upgrade
 
 # Install minimal required pfckages
-apt -y install sudo mc htop screen screenfetch ncdu gnupg curl wget net-tools
+apt -y install sudo mc htop screen screenfetch ncdu gnupg curl wget net-tools parted
 
 # Install build-essential (uncomment if necessary)
 #apt -y install build-essential dkms linux-headers-$(uname -r)
