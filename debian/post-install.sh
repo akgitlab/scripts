@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Post-install script for Debian server
-# Andrey Kuznetsov, 2023.02.21
+# Andrey Kuznetsov, 2024.10.29
 # Telegram: https://t.me/akmsg
 
 # WARNING! Carefully check all the settings, because by applying this script you can block your access to the server!
@@ -92,37 +92,21 @@ net.ipv6.conf.all.disable_ipv6 = 1
 EOF
 ) >  /etc/sysctl.d/90-disable-ipv6.conf
 
-# Add standart debian 11 repository
+# Add standart debian 12 repository
 (
 cat <<EOF
-# Official sources for Debian GNU/Linux 11.0.0 Bullseye
-
-deb http://deb.debian.org/debian/ bullseye main
-deb-src http://deb.debian.org/debian/ bullseye main
-
-deb http://security.debian.org/debian-security bullseye-security main contrib
-deb-src http://security.debian.org/debian-security bullseye-security main contrib
-
-deb http://deb.debian.org/debian/ bullseye-updates main contrib
-deb-src http://deb.debian.org/debian/ bullseye-updates main contrib
-EOF
-) >  /etc/apt/sources.list
-
-# Add standart debian 11 repository
-#(
-#cat <<EOF
 # Official sources for Debian GNU/Linux 12.0.0 Bookworm
 
-#deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
-#deb-src http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
 
-#deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
-#deb-src http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian-security/ bookworm-security main contrib non-free non-free-firmware
 
-#deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
-#deb-src http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
-#EOF
-#) >  /etc/apt/sources.list
+deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+EOF
+) >  /etc/apt/sources.list
 
 # Update system packages
 apt update && apt -y upgrade
@@ -136,10 +120,8 @@ apt -y install sudo mc htop screen screenfetch ncdu gnupg curl wget net-tools pa
 # Install and minimal configuration zabbix-agent
 if [ -x /usr/bin/apt-get ]; then
   cd /tmp
-  wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-4%2Bdebian11_all.deb
-  dpkg -i zabbix-release_6.0-4+debian11_all.deb
-#  wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-5+debian12_all.deb
-#  dpkg -i zabbix-release_6.0-5+debian12_all.deb
+  wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-5+debian12_all.deb
+  dpkg -i zabbix-release_6.0-5+debian12_all.deb
   apt update
   apt-get -y install zabbix-agent
   sed -i 's/Server=127.0.0.1/Server=10.0.22.21/' /etc/zabbix/zabbix_agentd.conf
