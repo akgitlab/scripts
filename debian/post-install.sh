@@ -33,6 +33,8 @@ OLDNAME=$(hostname)
 PATH=$PATH:/sbin
 
 
+# So let's begin...
+
 # Clearing the screen from previously entered commands
 clear -x
 
