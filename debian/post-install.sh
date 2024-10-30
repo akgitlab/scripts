@@ -170,10 +170,14 @@ echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /r
 echo -e "\n# User specific aliases and functions\nexport EDITOR=/bin/nano" >> /home/$RUSER/.bashrc
 
 # History settings
+cat <<EOT >> /root/.bashrc
+
+# History settings
 export HISTSIZE=10000
 export HISTTIMEFORMAT="%h %d %H:%M:%S "
 PROMPT_COMMAND='history -a'
 export HISTIGNORE="ls:ll:history:w:htop:pwd"
+EOT
 
 # Change motd banner on users logon
 echo -n > /etc/motd
