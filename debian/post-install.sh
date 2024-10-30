@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Post-install script for Debian server
+# Post-install script for Debian 12 server
 # Andrey Kuznetsov, 2024.10.29
 # Telegram: https://t.me/akmsg
 
