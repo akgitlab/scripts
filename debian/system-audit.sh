@@ -5,7 +5,7 @@ touch /tmp/audit/Рекомендации.txt
 lscpu > /tmp/audit/Процессор.txt
 free -h > /tmp/audit/Память.txt
 cat /etc/*release > /tmp/audit/"Информация о релизе.txt"
-getent passwd | awk -F: '{if($7=="/bin/bash")print $1}' > /tmp/audit/"Список пользователей.txt"
+getent passwd | awk -F: '{if($7=="/bin/bash")print $1}' | grep -wv root > /tmp/audit/"Список пользователей.txt"
 getent group sudo | cut -d: -f4 > /tmp/audit/"Список привилегированных пользователей.txt"
 apt list --installed > /tmp/audit/"Список установленных пакетов.txt"
 ps -eF > /tmp/audit/"Запущенные процессы.txt"
