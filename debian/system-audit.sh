@@ -2,6 +2,7 @@
 
 touch /tmp/audit/Рекомендации.txt
 dmidecode -s system-manufacturer > /tmp/audit/Описание.txt
+dmesg | grep -i hypervisor >> /tmp/audit/Описание.txt
 lscpu > /tmp/audit/Процессор.txt
 free -h > /tmp/audit/Память.txt
 cat /etc/*release > /tmp/audit/"Информация о релизе.txt"
