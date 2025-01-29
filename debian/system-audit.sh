@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Security audit bash script for Linux systems
+# Andrey Kuznetsov, 2025.01.29
+# Telegram: https://t.me/akmsg
+
+# This is a security audit bash script to gather instantly information about your Linux system which can also help you in the process of hardening.
+
 touch /tmp/audit/Рекомендации.txt
 hostnamectl > /tmp/audit/Описание.txt
 dmidecode -s system-manufacturer >> /tmp/audit/Описание.txt
