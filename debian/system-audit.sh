@@ -27,6 +27,13 @@ WHITE_R='\033[39m'
 RED='\e[31m'
 GREEN='\e[32m'
 
+# Set logfile path
+LOG="/var/log/post-install.log"
+
+# Real username
+RUSER=$(who | awk '{print $1}')
+
+
 # So let's begin...
 
 # Clearing the screen from previously entered commands
@@ -80,3 +87,8 @@ iptables-save | sudo tee /tmp/audit/"Правила фаервола.txt" > /dev
 ip a > /tmp/audit/"Сетевые интерфейсы.txt"
 docker ps --no-trunc > /tmp/audit/Контейнеры.txt
 lsblk > /tmp/audit/Диски.txt
+
+# Finish actions
+rm /home/$RUSER/post-install.sh
+apt -y autoremove && apt -y clean
+reboot
