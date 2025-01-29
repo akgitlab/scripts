@@ -28,7 +28,7 @@ RED='\e[31m'
 GREEN='\e[32m'
 
 # Real username
-RUSER=$(who | awk '{print $1}')
+RUSER=$(who | awk '{print $1}' | head -1)
 
 # Hostname
 RNAME=$(hostname)
