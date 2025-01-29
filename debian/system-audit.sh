@@ -27,12 +27,11 @@ WHITE_R='\033[39m'
 RED='\e[31m'
 GREEN='\e[32m'
 
-# Set logfile path
-LOG="/var/log/post-install.log"
-
 # Real username
 RUSER=$(who | awk '{print $1}')
 
+# Hostname
+RNAME=$(hostname)
 
 # So let's begin...
 
