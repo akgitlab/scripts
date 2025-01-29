@@ -1,4 +1,5 @@
 Дополнить отсюда: https://github.com/sokdr/LinuxAudit
+https://ipiskunov.blogspot.com/2016/11/linux.html
 
 #!/bin/bash
 
