@@ -1,3 +1,5 @@
+Дополнить отсюда: https://github.com/sokdr/LinuxAudit
+
 #!/bin/bash
 
 # Security audit bash script for Linux systems
