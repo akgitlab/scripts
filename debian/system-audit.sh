@@ -1,6 +1,10 @@
 Дополнить отсюда: https://github.com/sokdr/LinuxAudit
 https://ipiskunov.blogspot.com/2016/11/linux.html
 
+Пользователи без пароля
+cat /etc/shadow | awk -F: '$2 == ""'
+
+
 #!/bin/bash
 
 # Security audit bash script for Linux systems
