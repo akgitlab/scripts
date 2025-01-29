@@ -3,6 +3,8 @@ https://ipiskunov.blogspot.com/2016/11/linux.html
 
 Пользователи без пароля
 cat /etc/shadow | awk -F: '$2 == ""'
+или
+cat /etc/shadow | awk -F: '($2 == "" ) {print $1}'
 
 
 #!/bin/bash
