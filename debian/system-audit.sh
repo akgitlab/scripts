@@ -13,9 +13,7 @@ else
     echo "Файрвол не найден."
 fi
 
- echo -e "\e[0;33m 5. $HOSTNAME Uptime Information///// \e[0m"
-    echo
-    uptime
+https://dzen.ru/a/ZMp_gM3texUMQdny
 
 #!/bin/bash
 
