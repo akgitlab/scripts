@@ -15,6 +15,9 @@ fi
 
 https://dzen.ru/a/ZMp_gM3texUMQdny
 
+Сайты
+https://itisgood.ru/2024/03/01/spisok-vsekh-virtualnikh-khostov-v-nginx/https://itisgood.ru/2024/03/01/spisok-vsekh-virtualnikh-khostov-v-nginx/https://itisgood.ru/2024/03/01/spisok-vsekh-virtualnikh-khostov-v-nginx/
+
 #!/bin/bash
 
 # System audit scrip
