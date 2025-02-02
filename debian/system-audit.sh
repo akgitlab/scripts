@@ -54,6 +54,10 @@ RUSER=$(who | awk '{print $1}' | head -1)
 # Hostname
 RNAME=$(hostname)
 
+# Set report file path
+REPORT="/home/$RUSER/$RNAME-audit.txt"
+
+
 # So let's begin...
 
 # Clearing the screen from previously entered commands
@@ -89,7 +93,7 @@ then
 fi
 
 # Date and time start audit
-echo -e "\n$(date '+%d/%m/%Y %H:%M:%S')" >> $RESULT
+echo -e "\n$(date '+%d/%m/%Y %H:%M:%S')" >> $REPORT
 
 touch /tmp/audit/Рекомендации.txt
 hostnamectl > /tmp/audit/Описание.txt
