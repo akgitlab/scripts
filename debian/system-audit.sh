@@ -6,6 +6,27 @@ cat /etc/shadow | awk -F: '$2 == ""'
 или
 cat /etc/shadow | awk -F: '($2 == "" ) {print $1}'
 
+# Проверка настроек SSH
+print_section "Настройки SSH"
+if [ -f /etc/ssh/sshd_config ]; then
+    echo "Настройки SSH:"
+    grep -E 'PermitRootLogin|PasswordAuthentication|PubkeyAuthentication' /etc/ssh/sshd_config
+else
+    echo "Файл конфигурации SSH не найден."
+fi
+
+# Проверка наличия файрвола
+print_section "Проверка наличия файрвола"
+if command -v ufw &> /dev/null; then
+    echo "Статус UFW:"
+    ufw status
+elif command -v firewall-cmd &> /dev/null; then
+    echo "Статус Firewalld:"
+    firewall-cmd --state
+else
+    echo "Файрвол не найден."
+fi
+
 
 #!/bin/bash
 
