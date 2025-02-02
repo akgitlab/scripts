@@ -88,6 +88,8 @@ then
   exit 1
 fi
 
+# Date and time start audit
+echo -e "\n$(date '+%d/%m/%Y %H:%M:%S')" >> $RESULT
 
 touch /tmp/audit/Рекомендации.txt
 hostnamectl > /tmp/audit/Описание.txt
