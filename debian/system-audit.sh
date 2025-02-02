@@ -92,9 +92,28 @@ then
   exit 1
 fi
 
+# Request to save results
+while true; do
+    read -p "Would you like to save the output? [Y/N] " output
+    case "${output^^}" in
+        Y)
+            echo "File will be saved to $REPORT"
+            break
+            ;;
+        N)
+            echo "OK, not saving moving on."
+            break
+            ;;
+        *)
+            echo "Invalid input. Please enter Y or N."
+            ;;
+    esac
+done
+
 # Date and time start audit
 echo -e "\n$(date '+%d/%m/%Y %H:%M:%S')" >> $REPORT
 
+### Old script ###
 touch /tmp/audit/Рекомендации.txt
 hostnamectl > /tmp/audit/Описание.txt
 dmidecode -s system-manufacturer >> /tmp/audit/Описание.txt
@@ -114,7 +133,6 @@ ip a > /tmp/audit/"Сетевые интерфейсы.txt"
 docker ps --no-trunc > /tmp/audit/Контейнеры.txt
 lsblk > /tmp/audit/Диски.txt
 
+
 # Finish actions
 rm /home/$RUSER/post-install.sh
-apt -y autoremove && apt -y clean
-reboot
