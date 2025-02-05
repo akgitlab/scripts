@@ -126,14 +126,19 @@ echo -e "\e[0;33m##### 5. Checks packages broken dependencies #####\e[0m"
 apt-get check
 echo
 
-echo -e "\e[0;33m##### 6. Time zone information #####\e[0m"
-  timedatectl | grep zone | sed -e 's/^[^[:alpha:]]\+//'
-  # or "timedatectl status | grep "zone" | sed -e 's/^[ ]*Time zone: \(.*\) (.*)$/\1/g'"
-  # or "timedatectl | sed -n 's/^\s*Time zone: \(.*\) (.*/\1/p'"
-  # or "cat /etc/timezone"
+echo -e "\e[0;33m##### 6. Network interfaces addresses #####\e[0m"
+ip a | grep -E 'inet ' | awk '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//'
 echo
 
-echo -e "\e[0;33m##### 7. Secure shell settings #####\e[0m"
+echo -e "\e[0;33m##### 7. Routing table #####\e[0m"
+ip route
+echo
+
+echo -e "\e[0;33m##### 8. Time zone information #####\e[0m"
+  timedatectl | grep zone | sed -e 's/^[^[:alpha:]]\+//'
+echo
+
+echo -e "\e[0;33m##### 9. Secure shell settings #####\e[0m"
   if [ -f /etc/ssh/sshd_config ]; then
     grep -E 'PermitRootLogin|PasswordAuthentication|PubkeyAuthentication|Listen|Port' /etc/ssh/sshd_config
   else
@@ -141,7 +146,7 @@ echo -e "\e[0;33m##### 7. Secure shell settings #####\e[0m"
   fi
 echo
 
-echo -e "\e[0;33m##### 8. Users information #####\e[0m"
+echo -e "\e[0;33m##### 10. Users information #####\e[0m"
   echo "All users except system:"
     getent passwd | awk -F: '{if($7=="/bin/bash")print $1}' | grep -wv root
   echo "Privileged users:"
@@ -162,7 +167,7 @@ echo -e "\e[0;33m##### 8. Users information #####\e[0m"
     sudo -l | sed '/^[[:space:]]*$/d' | sed -e 's/^[^[:alpha:]]\+//'
 echo
 
-echo -e "\e[0;33m##### 9. Explicitly specified passwords #####\e[0m"
+echo -e "\e[0;33m##### 11. Explicitly specified passwords #####\e[0m"
 SEARCH_DIR="/etc"
 EXCLUDE_FILES=("file1.conf" "file2.conf")
 EXCLUDE_PATTERN=$(printf "! -name %s " "${EXCLUDE_FILES[@]}")
@@ -174,15 +179,7 @@ EXCLUDE_PATTERN=$(printf "! -name %s " "${EXCLUDE_FILES[@]}")
   fi
 echo
 
-echo -e "\e[0;33m##### 9. Network interfaces addresses #####\e[0m"
-ip a | grep -E 'inet ' | awk '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//'
-echo
-
-echo -e "\e[0;33m##### 10. Routing table #####\e[0m"
-ip route
-echo
-
-echo -e "\e[0;33m##### 10. Installed databases #####\e[0m"
+echo -e "\e[0;33m##### 12. Installed databases #####\e[0m"
 check_mysql() {
     if command -v mysql >/dev/null 2>&1; then
         out=$(mysql --version)
@@ -212,7 +209,7 @@ check_postgresql
 check_sqlite
 echo
 
-echo -e "\e[0;33m##### 11. Web publications #####\e[0m"
+echo -e "\e[0;33m##### 13. Web publications #####\e[0m"
   if command -v nginx &> /dev/null; then
     echo "Web server NGINX status:"
     systemstl status nginx
@@ -225,7 +222,7 @@ echo -e "\e[0;33m##### 11. Web publications #####\e[0m"
   fi
 echo
 
-echo -e "\e[0;33m##### 12. System monitoring status #####\e[0m"
+echo -e "\e[0;33m##### 14. System monitoring status #####\e[0m"
 if command systemctl status zabbix-agent &> /dev/null; then
   systemctl status zabbix-agent | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//'
   ZBX=$(grep -vE 'Example|# Server=' /etc/zabbix/zabbix_agentd.conf | grep "Server=" | sed 's/.*=//')
@@ -259,7 +256,7 @@ else
 fi
 echo
 
-echo -e "\e[0;33m##### 13. All running services #####\e[0m"
+echo -e "\e[0;33m##### 15. All running services #####\e[0m"
 service --status-all 2>/dev/null | grep "+" | awk '{print $4}' | grep -vE "(apparmor|bluetooth|cron|cups|dbus|gdm|kmod|networking|plymouth|procps|rpcbind|udev|sensors)"
 echo
 
