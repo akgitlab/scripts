@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# System audit scrip
+# System audit script
 # Andrey Kuznetsov, 2025.02.05
 # Telegram: https://t.me/akmsg
 
