@@ -56,7 +56,7 @@ start_script() {
 }
 start_script
 
-sleep 3
+sleep 1
 
 # User privilege check
 if [[ $EUID -ne 0 ]]; then
@@ -100,10 +100,20 @@ echo -e "\e[0;33mScript started at $(date '+%d/%m/%Y %H:%M:%S')\e[0m"
 echo
 echo -e "\e[0;33m##### 1. Hardware information #####\e[0m"
   hostnamectl | sed -e 's/^[^[:alpha:]]\+//' | grep -vE "(Icon|hostname|Kernel|Operating|Firmware|ID)" | sort -n
+  lscpu | grep -E 'Vendor|Model name|Core|Virtualization' | grep -vE "(BIOS Model name|Vendor ID)" | sed -e "s/[[:space:]]\+/ /g"
+  out=$(awk '/MemTotal/ {printf "%.2f GB\n", $2/1024/1024}' /proc/meminfo)
+  echo "Available memory: $out"
 echo
+
 echo -e "\e[0;33m##### 2. Kernel information #####\e[0m"
-  cat /proc/sys/kernel/{ostype,osrelease,version}
-  # or "uname -a"
+  cat /proc/sys/kernel/{osrelease,version} | tr -d '#' | sort -n
+  out=$(dmesg -H | grep -i "error" | sed 's/^[^a-zA-Z]*//' | uniq 2>/dev/null)
+    if [ -z "$out" ]; then
+      echo "No kernel errors found."
+    else
+      echo "~"
+      echo "$out"
+    fi
 echo
 
 echo -e "\e[0;33m##### 3. System runtime information #####\e[0m"
@@ -123,15 +133,15 @@ echo -e "\e[0;33m##### 4. Distribution information #####\e[0m"
 echo
 
 echo -e "\e[0;33m##### 5. Checks packages broken dependencies #####\e[0m"
-apt-get check
+  apt-get check
 echo
 
 echo -e "\e[0;33m##### 6. Network interfaces addresses #####\e[0m"
-ip a | grep -E 'inet ' | awk '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//'
+  ip a | grep -E 'inet ' | awk '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//'
 echo
 
 echo -e "\e[0;33m##### 7. Routing table #####\e[0m"
-ip route
+  ip route
 echo
 
 echo -e "\e[0;33m##### 8. Time zone information #####\e[0m"
@@ -181,28 +191,28 @@ echo
 
 echo -e "\e[0;33m##### 12. Installed databases #####\e[0m"
 check_mysql() {
-    if command -v mysql >/dev/null 2>&1; then
-        out=$(mysql --version)
-        echo "MySQL version: $out"
-    else
-        echo "MySQL not found."
+  if command -v mysql >/dev/null 2>&1; then
+    out=$(mysql --version)
+    echo "MySQL version: $out"
+  else
+    echo "MySQL not found."
     fi
 }
 check_postgresql() {
-    if command -v psql >/dev/null 2>&1; then
-        out=$(psql --version)
-        echo "PostgreSQL version: $out"
-    else
-        echo "PostgreSQL not found."
-    fi
+  if command -v psql >/dev/null 2>&1; then
+    out=$(psql --version)
+    echo "PostgreSQL version: $out"
+  else
+    echo "PostgreSQL not found."
+  fi
 }
 check_sqlite() {
-    if command -v sqlite3 >/dev/null 2>&1; then
-        out=$(sqlite3 --version)
-        echo "SQLite version: $out"
-    else
-        echo "SQLite not found."
-    fi
+  if command -v sqlite3 >/dev/null 2>&1; then
+    out=$(sqlite3 --version)
+    echo "SQLite version: $out"
+  else
+    echo "SQLite not found."
+  fi
 }
 check_mysql
 check_postgresql
@@ -257,7 +267,7 @@ fi
 echo
 
 echo -e "\e[0;33m##### 15. All running services #####\e[0m"
-service --status-all 2>/dev/null | grep "+" | awk '{print $4}' | grep -vE "(apparmor|bluetooth|cron|cups|dbus|gdm|kmod|networking|plymouth|procps|rpcbind|udev|sensors)"
+  service --status-all 2>/dev/null | grep "+" | awk '{print $4}' | grep -vE "(apparmor|bluetooth|cron|cups|dbus|gdm|kmod|networking|plymouth|procps|rpcbind|udev|sensors)"
 echo
 
 
