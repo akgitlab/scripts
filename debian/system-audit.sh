@@ -20,18 +20,21 @@ GREEN='\e[32m'
 
 # Hostname
 RNAME=$(hostname | tr [:lower:] [:upper:])
+FILENAME=$(hostname)
 
 # Real username
 RUSER=$(who | awk '{print $1}' | head -1)
 
 # Set report file path
-REPORT="/tmp/$RNAME-audit.txt"
+RAWDATA="/tmp/$FILENAME-audit.raw"
+REPORT="/tmp/$FILENAME-audit.txt"
 
 # For timer to script
 START=$(date +%s)
 
-# Clearing the screen from previously entered commands
+# Clearing the screen and oldfile from previously entered commands
 clear -x
+rm -f $REPORT
 
 # Print script logo
 script_logo() {
@@ -89,14 +92,14 @@ done
 
 echo
 echo "So, let's begin..."
-echo "Please wait to finish system audit for $RNAME."
+echo "Script started at $(date '+%d/%m/%Y %H:%M:%S')"
+echo "Please wait to finish system audit for $RNAME"
 sleep 1
 echo
 
 # Function to perform audit
 perform_audit() {
 
-echo -e "\e[0;33mScript started at $(date '+%d/%m/%Y %H:%M:%S')\e[0m"
 echo
 echo -e "\e[0;33m##### 1. Hardware information #####\e[0m"
   hostnamectl | sed -e 's/^[^[:alpha:]]\+//' | grep -vE "(Icon|hostname|Kernel|Operating|Firmware|ID)" | sort -n
@@ -105,113 +108,151 @@ echo -e "\e[0;33m##### 1. Hardware information #####\e[0m"
   echo "Available memory: $out"
 echo
 
-echo -e "\e[0;33m##### 2. Kernel information #####\e[0m"
-  cat /proc/sys/kernel/{osrelease,version} | tr -d '#' | sort -n
-  out=$(dmesg -H | grep -i "error" | sed 's/^[^a-zA-Z]*//' | uniq 2>/dev/null)
+echo -e "\e[0;33m##### 2. Storage and VG information #####\e[0m"
+  lsblk
+echo
+
+echo -e "\e[0;33m##### 3. Mounted network resources #####\e[0m"
+  out=$(mount | grep -E 'type (nfs|cifs|smb|nfs4)' | sed 's/(.*//')
+  mntcount=$(mount | grep -E 'type (nfs|cifs|smb|nfs4)' | sed 's/(.*//' | wc -l)
     if [ -z "$out" ]; then
-      echo "No kernel errors found."
+      echo "No mounted resources found"
     else
-      echo "~"
+      echo "Mount points: $mntcount"
       echo "$out"
     fi
 echo
 
-echo -e "\e[0;33m##### 3. System runtime information #####\e[0m"
-  out=$(uptime -p | cut -d " " -f2-)
+echo -e "\e[0;33m##### 4. Kernel information #####\e[0m"
+  cat /proc/sys/kernel/{osrelease,version} | tr -d '#' | sort -n
+  out=$(dmesg -H | grep -i "error" | sed 's/^[^a-zA-Z]*//' | uniq 2>/dev/null)
+  errorcount=$(dmesg -H | grep -i "error" | sed 's/^[^a-zA-Z]*//' | uniq | wc -l 2>/dev/null)
     if [ -z "$out" ]; then
-      echo "No information about uptime."
+      echo "No kernel errors found"
     else
-      echo "System uptime: $out"
-      echo "System boot at: $(who -b | awk '{print $3, $4}' | xargs -I {} date -d "{}" +"%d/%m/%Y %H:%M:%S")"
+      echo "Kernel errors found: $errorcount"
+      echo "$out"
     fi
 echo
 
-echo -e "\e[0;33m##### 4. Distribution information #####\e[0m"
+echo -e "\e[0;33m##### 5. System runtime information #####\e[0m"
+  out=$(uptime -p | cut -d " " -f2-)
+    if [ -z "$out" ]; then
+      echo "No information about uptime"
+    else
+      echo "Uptime: $out"
+      echo "Boot at: $(who -b | awk '{print $3, $4}' | xargs -I {} date -d "{}" +"%d/%m/%Y %H:%M:%S")"
+    fi
+echo
+
+echo -e "\e[0;33m##### 6. Distribution information #####\e[0m"
   lsb_release -a | sed -e "s/[[:space:]]\+/ /g"
   echo "Installed at: $(ls -lct --time-style=+"%d/%m/%Y %H:%M:%S" / | tail -1 | awk '{print $6, $7}')"
   echo "Last updated at: $(date -d @"$(stat -c %Y /var/cache/apt/)" +"%d/%m/%Y %H:%M:%S")"
 echo
 
-echo -e "\e[0;33m##### 5. Checks packages broken dependencies #####\e[0m"
+echo -e "\e[0;33m##### 7. Checks packages broken dependencies #####\e[0m"
   apt-get check
 echo
 
-echo -e "\e[0;33m##### 6. Network interfaces addresses #####\e[0m"
+echo -e "\e[0;33m##### 8. Network interfaces addresses #####\e[0m"
   ip a | grep -E 'inet ' | awk '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//'
 echo
 
-echo -e "\e[0;33m##### 7. Routing table #####\e[0m"
+echo -e "\e[0;33m##### 9. Routing table #####\e[0m"
   ip route
 echo
 
-echo -e "\e[0;33m##### 8. Time zone information #####\e[0m"
+echo -e "\e[0;33m##### 10. Time zone information #####\e[0m"
   timedatectl | grep zone | sed -e 's/^[^[:alpha:]]\+//'
 echo
 
-echo -e "\e[0;33m##### 9. Secure shell settings #####\e[0m"
-  if [ -f /etc/ssh/sshd_config ]; then
-    grep -E 'PermitRootLogin|PasswordAuthentication|PubkeyAuthentication|Listen|Port' /etc/ssh/sshd_config
-  else
-    echo "Configuration file not found."
-  fi
-echo
-
-echo -e "\e[0;33m##### 10. Users information #####\e[0m"
-  echo "All users except system:"
+echo -e "\e[0;33m##### 11. Users information #####\e[0m"
+#
+  usercount=$(getent passwd | awk -F: '{if($7=="/bin/bash")print $1}' | grep -wv root | wc -l)
+  echo "Existing real users: $usercount"
     getent passwd | awk -F: '{if($7=="/bin/bash")print $1}' | grep -wv root
-  echo "Privileged users:"
-    out=$(getent group sudo | cut -d: -f4 | sed '/^[[:space:]]*$/d')
-      if [ -z "$out" ]; then
-        echo "No users with elevated privileges found."
-      else
-        echo "$out"
-      fi
-  echo "Users with null passwords:"
-    out=$(cat /etc/shadow | awk -F: '($2 == "" ) {print $1}' | sed '/^[[:space:]]*$/d')
-      if [ -z "$out" ]; then
-        echo "No users with empty password found."
-      else
-        echo "$out"
-      fi
+#
+  out=$(getent group sudo | cut -d: -f4 | sed '/^[[:space:]]*$/d')
+  pusercount=$(getent group sudo | cut -d: -f4 | sed '/^[[:space:]]*$/d' | wc -l)
+    if [ -z "$out" ]; then
+      echo "No users with elevated privileges found"
+    else
+      echo "Privileged users: $pusercount"
+      echo "$out"
+    fi
+#
+  nullpasscount=$(cat /etc/shadow | awk -F: '($2 == "" ) {print $1}' | sed '/^[[:space:]]*$/d' | wc -l)
+  out=$(cat /etc/shadow | awk -F: '($2 == "" ) {print $1}' | sed '/^[[:space:]]*$/d')
+    if [ -z "$out" ]; then
+      echo "No users with empty password found"
+    else
+      echo "Users with null passwords: $nullpasscount"
+      echo "$out"
+    fi
+# Доработать вывод
   echo "Users may run the following commands:"
-    sudo -l | sed '/^[[:space:]]*$/d' | sed -e 's/^[^[:alpha:]]\+//'
+    for u in $(awk -F'[/:]' '{if($3>=1000&&$3!=65534) print $1}' /etc/passwd); do 
+      sudo -lU "$u" | sed '/^[[:space:]]*$/d' | sed 's/^[ \t]*//';
+    done
+
 echo
 
-echo -e "\e[0;33m##### 11. Explicitly specified passwords #####\e[0m"
+echo -e "\e[0;33m##### 12. Explicitly specified passwords #####\e[0m"
 SEARCH_DIR="/etc"
 EXCLUDE_FILES=("file1.conf" "file2.conf")
 EXCLUDE_PATTERN=$(printf "! -name %s " "${EXCLUDE_FILES[@]}")
+# Доработать вывод
   out=$(find "$SEARCH_DIR" -type f $EXCLUDE_PATTERN -exec grep -E -i 'password=|secret=|token=' {} \; 2>/dev/null)
   if [ -z "$out" ]; then
-    echo "No clear text passwords found."
+    echo "No clear text passwords found"
   else
     echo "$out"
   fi
 echo
 
-echo -e "\e[0;33m##### 12. Installed databases #####\e[0m"
+echo -e "\e[0;33m##### 13. Secure shell settings #####\e[0m"
+  if [ -f /etc/ssh/sshd_config ]; then
+    grep -E 'PermitRootLogin|PasswordAuthentication|PubkeyAuthentication|Listen|Port' /etc/ssh/sshd_config | grep -v '^# ' | grep -v '::'
+  else
+    echo "Configuration file not found"
+  fi
+echo
+
+echo -e "\e[0;33m##### 15. Container applications #####\e[0m"
+  out=$(docker ps --no-trunc 2>/dev/null)
+  dockercount=$(docker ps --no-trunc 2>/dev/null | wc -l)
+    if [ -z "$out" ]; then
+      echo "No running containers found"
+    else
+      echo "Docker containers: $dockercount"
+      echo "$out"
+    fi
+echo
+
+echo -e "\e[0;33m##### 16. Installed databases #####\e[0m"
 check_mysql() {
   if command -v mysql >/dev/null 2>&1; then
     out=$(mysql --version)
-    echo "MySQL version: $out"
+    echo "MySQL installed version: $out"
   else
-    echo "MySQL not found."
+    echo "MySQL not found"
     fi
 }
 check_postgresql() {
   if command -v psql >/dev/null 2>&1; then
     out=$(psql --version)
-    echo "PostgreSQL version: $out"
+    echo "PostgreSQL installed version: $out"
   else
-    echo "PostgreSQL not found."
+    echo "PostgreSQL not found"
   fi
 }
 check_sqlite() {
   if command -v sqlite3 >/dev/null 2>&1; then
     out=$(sqlite3 --version)
-    echo "SQLite version: $out"
+    echo "SQLite installed version: $out"
   else
-    echo "SQLite not found."
+    echo "SQLite not found"
   fi
 }
 check_mysql
@@ -219,7 +260,7 @@ check_postgresql
 check_sqlite
 echo
 
-echo -e "\e[0;33m##### 13. Web publications #####\e[0m"
+echo -e "\e[0;33m##### 17. Web publications #####\e[0m"
   if command -v nginx &> /dev/null; then
     echo "Web server NGINX status:"
     systemstl status nginx
@@ -228,11 +269,12 @@ echo -e "\e[0;33m##### 13. Web publications #####\e[0m"
     echo "Web server APACHE status:"
     systemstl status apache
   else
-    echo "No published resources found."
+    echo "No published resources found"
   fi
 echo
 
-echo -e "\e[0;33m##### 14. System monitoring status #####\e[0m"
+# Checking monitoring agents
+echo -e "\e[0;33m##### 18. System monitoring status #####\e[0m"
 if command systemctl status zabbix-agent &> /dev/null; then
   systemctl status zabbix-agent | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//'
   ZBX=$(grep -vE 'Example|# Server=' /etc/zabbix/zabbix_agentd.conf | grep "Server=" | sed 's/.*=//')
@@ -262,31 +304,37 @@ elif command systemctl status zabbix-agent2 &> /dev/null; then
       echo "Connect to TCP port: No connection"
     fi
 else
-  echo "Monitoring agents not found."
+  echo "Monitoring agents not found"
 fi
 echo
 
-echo -e "\e[0;33m##### 15. All running services #####\e[0m"
+echo -e "\e[0;33m##### 19. All running services #####\e[0m"
   service --status-all 2>/dev/null | grep "+" | awk '{print $4}' | grep -vE "(apparmor|bluetooth|cron|cups|dbus|gdm|kmod|networking|plymouth|procps|rpcbind|udev|sensors)"
 echo
 
-
 }
 
-# Function write to file
+# Function write to file and change owner
 if [[ "${output^^}" == "Y" ]]; then
-  perform_audit >> $REPORT
+  script_logo >> $RAWDATA
+  echo "The audit was carried out in $(date '+%d/%m/%Y %H:%M:%S')" >> $RAWDATA
+  perform_audit >> $RAWDATA
+  sed 's/\x1b[[0-9;]*m//g' $RAWDATA > $REPORT
+  rm -f $RAWDATA
   chown $RUSER:$RUSER $REPORT
 else
   perform_audit
 fi
 
+# Message about successful completion of the script
 echo
-echo "################################################################"
+echo "Success!"
 echo
+
+# Calculating script execution time
 END=$(date +%s)
 DIFF=$(( END - START ))
-echo "Script completed in $DIFF seconds."
+echo "Script completed in $DIFF seconds"
 echo
 
 exit 0
