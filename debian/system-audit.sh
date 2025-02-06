@@ -359,6 +359,13 @@ else
     echo "Файрвол не найден."
 fi
 
+#Subsystem	sftp	/usr/libexec/openssh/sftp-server
+Subsystem sftp internal-sftp
+Match Group dev-group
+ChrootDirectory /home/dev-group/
+
+
+
 https://dzen.ru/a/ZMp_gM3texUMQdny
 
 Сайты
