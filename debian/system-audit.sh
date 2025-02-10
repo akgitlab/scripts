@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # System audit script
-# Andrey Kuznetsov, 2025.02.05
+# Andrey Kuznetsov, 2025.02.10
 # Telegram: https://t.me/akmsg
 
 # This is a system audit bash script to gather instantly information about your Linux system
