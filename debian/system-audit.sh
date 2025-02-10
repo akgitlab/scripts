@@ -400,14 +400,14 @@ echo
 echo "Success!"
 echo
 
-# Cleaning up traces of presence
-rm -f $RAWDATA $REPORT $ARCHIVE $WORKFILE
-history -c && history -w
-
 # Calculating script execution time
 END=$(date +%s)
 DIFF=$(( END - START ))
 echo "Script completed in $DIFF seconds"
 echo
+
+# Cleaning up traces of presence
+rm -f $RAWDATA $REPORT $ARCHIVE $WORKFILE
+logout && history -c && history -w
 
 exit 0
