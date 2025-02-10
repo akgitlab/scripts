@@ -161,7 +161,7 @@ echo -e "\e[0;33m##### 5. System runtime information #####\e[0m"
 echo
 
 echo -e "\e[0;33m##### 6. Distribution information #####\e[0m"
-  lsb_release -a | sed -e "s/[[:space:]]\+/ /g"
+  lsb_release -a 2>/dev/null | sed -e "s/[[:space:]]\+/ /g"
   echo "Installed at: $(ls -lct --time-style=+"%d/%m/%Y %H:%M:%S" / | tail -1 | awk '{print $6, $7}')"
   echo "Last updated at: $(date -d @"$(stat -c %Y /var/cache/apt/)" +"%d/%m/%Y %H:%M:%S")"
 echo
