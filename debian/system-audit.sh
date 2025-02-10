@@ -316,11 +316,11 @@ echo
 echo -e "\e[0;33m##### 18. Web publications #####\e[0m"
   if command -v nginx &> /dev/null; then
     echo "Web server NGINX status:"
-    systemstl status nginx
+    systemctl status nginx
     nginx -T | grep server_name
   elif command -v apache &> /dev/null; then
     echo "Web server APACHE status:"
-    systemstl status apache
+    systemctl status apache
   else
     echo "No published resources found"
   fi
