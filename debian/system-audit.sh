@@ -402,8 +402,7 @@ echo
 
 # Cleaning up traces of presence
 rm -f $RAWDATA $REPORT $ARCHIVE $WORKFILE
-history -c
-history -w
+history -cw
 
 # Calculating script execution time
 END=$(date +%s)
