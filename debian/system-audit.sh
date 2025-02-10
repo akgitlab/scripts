@@ -32,7 +32,7 @@ WORKFILE="/tmp/system-audit.sh"
 RAWDATA="/tmp/$FILENAME-audit.raw"
 REPORT="/tmp/$FILENAME-audit.txt"
 ARCHIVE="/tmp/$FILENAME-audit.tar.gz"
-WEBDAV="https://sharegate.ru/audit/$FILENAME-audit.tar.gz"
+WEBDAV="https://work.sharegate.ru/audit/$FILENAME-audit.tar.gz"
 
 # For timer to script
 START=$(date +%s)
