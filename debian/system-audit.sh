@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # System audit script
-# Andrey Kuznetsov, 2025.02.10
+# Andrey Kuznetsov, 2025.02.05
 # Telegram: https://t.me/akmsg
 
 # This is a system audit bash script to gather instantly information about your Linux system
@@ -28,6 +28,7 @@ FILENAME=$(hostname)
 RUSER=$(who | awk '{print $1}' | head -1)
 
 # Set report file path
+WORKFILE="/tmp/system-audit.sh"
 RAWDATA="/tmp/$FILENAME-audit.raw"
 REPORT="/tmp/$FILENAME-audit.txt"
 ARCHIVE="/tmp/$FILENAME-audit.tar.gz"
@@ -400,7 +401,7 @@ echo "Success!"
 echo
 
 # Cleaning up traces of presence
-rm -f $RAWDATA $REPORT $ARCHIVE
+rm -f $RAWDATA $REPORT $ARCHIVE $WORKFILE
 #history -c
 
 # Calculating script execution time
