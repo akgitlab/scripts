@@ -402,7 +402,7 @@ echo
 
 # Cleaning up traces of presence
 rm -f $RAWDATA $REPORT $ARCHIVE $WORKFILE
-sudo -u $RUSER history -r
+history -r /home/$RUSER/.bash_history
 
 # Calculating script execution time
 END=$(date +%s)
