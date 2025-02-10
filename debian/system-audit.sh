@@ -315,14 +315,14 @@ echo
 
 echo -e "\e[0;33m##### 18. Web publications #####\e[0m"
   if command -v nginx &> /dev/null; then
-    echo "Web server NGINX status:"
-    systemctl status nginx
-    nginx -T | grep server_name
+    out=$(systemctl status nginx  | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//')
+    echo "Web server NGINX status: $out"
+    nginx -T | grep server_name | grep -vE "(configuration|bucket|redirect|example)"
   elif command -v apache &> /dev/null; then
-    echo "Web server APACHE status:"
-    systemctl status apache
+    out=$(systemctl status apache  | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//')
+    echo "Web server APACHE status: $out"
   else
-    echo "No published resources found"
+    echo "No Web server and published resources found"
   fi
 echo
 
