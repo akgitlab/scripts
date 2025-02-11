@@ -187,28 +187,28 @@ echo
 
 echo -e "\e[0;33m##### 10. Firewall and fail2ban availability #####\e[0m"
   if command -v iptables >/dev/null 2>&1; then
-    out=$(systemctl status iptables | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//') | awk -F': ' '{print $2}'
+    out=$(systemctl status iptables 2>/dev/null | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//' | awk -F': ' '{print $2}')
     echo "Iptables status: $out"
   else
     echo "Iptables status: not found"
   fi
 
   if systemctl is-active --quiet firewalld; then
-    out=$(systemctl status firewalld | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//' | awk -F': ' '{print $2}')
+    out=$(systemctl status firewalld 2>/dev/null | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//' | awk -F': ' '{print $2}')
     echo "Firewalld status: $out"
   else
     echo "Firewalld status: not active or not installed"
   fi
 
   if command -v nft >/dev/null 2>&1; then
-    out=$(systemctl status nftables | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//' | awk -F': ' '{print $2}')
+    out=$(systemctl status nftables 2>/dev/null | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//' | awk -F': ' '{print $2}')
     echo "Nftables status: $out"
   else
     echo "Nftables status: not found"
   fi
 
   if command -v fail2ban >/dev/null 2>&1; then
-    out=$(systemctl status fail2ban | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//' | awk -F': ' '{print $2}')
+    out=$(systemctl status fail2ban 2>/dev/null | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//' | awk -F': ' '{print $2}')
     echo "Fail2ban status: $out"
   else
     echo "Fail2ban status: not found"
