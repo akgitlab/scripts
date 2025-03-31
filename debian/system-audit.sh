@@ -317,7 +317,8 @@ echo -e "\e[0;33m##### 18. Web publications #####\e[0m"
   if command -v nginx &> /dev/null; then
     out=$(systemctl status nginx  | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//')
     echo "Web server NGINX status: $out"
-    nginx -T 2>/dev/null | grep server_name | grep -vE "(nginx|bucket|redirect|example|_;)" | sed -e 's/^[^[:alpha:]]\+//'
+    nginx -T 2>/dev/null | grep server_name | grep -vE "(nginx|bucket|redirect|example|_;)" | sed -e 's/server_name //' \
+    -e 's/^[^[:alpha:]]\+//' -e 's/^[ \t]*//; s/[ \t]*$//; s/[;]*$//'
   elif command -v apache &> /dev/null; then
     out=$(systemctl status apache  | grep "Active:" | sed -e 's/^[^[:alpha:]]\+//')
     echo "Web server APACHE status: $out"
