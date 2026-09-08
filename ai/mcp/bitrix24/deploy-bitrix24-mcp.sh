@@ -3,26 +3,39 @@ set -euo pipefail
 
 # --- КОНФИГУРАЦИЯ ---
 ARCHIVE_PATH="${1:-/home/devops/integrations/bitrix24/bitrix24_mcp-1.0.1}"
+# Если ARCHIVE_PATH не найден на диске, исходники скачиваются отсюда:
+PYPI_URL="https://files.pythonhosted.org/packages/c9/ea/0e3c534e0badd2e3ea1723c0a27f572449225db979d44e4b2b2667d9b308/bitrix24_mcp-1.0.1.tar.gz"
 SERVER_NAME="bitrix24"
 INSTALL_DIR="/opt/mcp/servers/${SERVER_NAME}"
 HTTP_PORT="${HTTP_PORT:-8003}"   # 8000-8002 заняты (hpovsd, zabbix), bitrix24 на 8003
 MCP_PATH="${MCP_PATH:-/mcp}"
-SECRETS_DIR="${INSTALL_DIR}/secrets"   # внутри INSTALL_DIR, переживает rm -rf через бэкап/восстановление
-LOG_DIR="/var/log/mcp"                 # как у hpovsd/zabbix
+SECRETS_DIR="${INSTALL_DIR}/secrets"        # переживает rm -rf через бэкап/восстановление
+UV_PYTHON_INSTALL_DIR="${INSTALL_DIR}/uv-python"   # managed-Python живёт в INSTALL_DIR (uv только у bitrix24)
+LOG_DIR="/var/log/mcp"                      # как у hpovsd/zabbix
 LOG_FILE="${LOG_DIR}/mcp-${SERVER_NAME}.log"
 
 log_info()  { echo "[INFO] $1"; }
 log_warn()  { echo "[WARN] $1"; }
 log_error() { echo "[ERROR] $1"; }
 
-# --- ПРОВЕРКИ ---
-if [[ ! -d "$ARCHIVE_PATH" && ! -f "$ARCHIVE_PATH" ]]; then
-    log_error "Архив/каталог не найден: $ARCHIVE_PATH"
-    exit 1
-fi
-
+# --- ПРОВЕРКИ / ИСТОЧНИК ---
 log_info "Начало развёртывания: $SERVER_NAME"
-log_info "Источник: $ARCHIVE_PATH"
+
+TMP_SRC=""
+cleanup() { [[ -n "$TMP_SRC" ]] && rm -rf "$TMP_SRC"; }
+trap cleanup EXIT
+
+if [[ ! -d "$ARCHIVE_PATH" && ! -f "$ARCHIVE_PATH" ]]; then
+    log_info "Источник '$ARCHIVE_PATH' не найден, скачиваю с PyPI..."
+    TMP_SRC="$(mktemp -d)"
+    curl -fsSL "$PYPI_URL" -o "$TMP_SRC/pkg.tar.gz"
+    tar -xzf "$TMP_SRC/pkg.tar.gz" -C "$TMP_SRC"
+    ARCHIVE_PATH="$(dirname "$(find "$TMP_SRC" -maxdepth 3 -name pyproject.toml | head -1)")"
+    [[ -d "$ARCHIVE_PATH" ]] || { log_error "pyproject.toml не найден в скачанном архиве"; exit 1; }
+    log_info "Источник: $ARCHIVE_PATH (распакован из PyPI)"
+else
+    log_info "Источник: $ARCHIVE_PATH"
+fi
 
 mkdir -p /opt/mcp/servers
 
@@ -43,7 +56,7 @@ log_info "Установка системных пакетов..."
 apt update
 apt install -y curl ca-certificates
 
-# --- UV (менеджер окружений, проект идёт с uv.lock, требует python>=3.12) ---
+# --- UV ---
 if ! command -v uv &>/dev/null; then
     log_info "Установка uv..."
     curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="/usr/local/bin" sh
@@ -51,25 +64,19 @@ else
     log_info "uv уже установлен: $(uv --version)"
 fi
 
-# Managed-Python в общий каталог (не в /root), иначе venv будет ссылаться
-# на интерпретатор в /root/.local/..., недоступный пользователю mcp в systemd
-export UV_PYTHON_INSTALL_DIR="/opt/mcp/uv/python"
-mkdir -p "$UV_PYTHON_INSTALL_DIR"
-
 # --- РАСПАКОВКА ---
 log_info "Подготовка каталога: $INSTALL_DIR"
 
-# Секреты переживают переустановку: старый плоский secrets.env мигрируем
-# в ${SECRETS_DIR}, каталог бэкапим перед rm -rf и возвращаем после распаковки
-TMP_SECRETS="$(mktemp -d)"
-if [[ -f "${INSTALL_DIR}/secrets.env" && ! -f "${SECRETS_DIR}/secrets.env" ]]; then
-    log_info "Миграция ${INSTALL_DIR}/secrets.env -> ${SECRETS_DIR}/secrets.env"
-    mkdir -p "$SECRETS_DIR"
-    mv "${INSTALL_DIR}/secrets.env" "${SECRETS_DIR}/secrets.env"
-fi
-if [[ -d "$SECRETS_DIR" ]]; then
-    cp -a "$SECRETS_DIR"/. "$TMP_SECRETS"/
-fi
+# Переживают rm -rf при переустановке: секреты и managed-Python бэкапим
+# во временный каталог и возвращаем после распаковки
+TMP_KEEP="$(mktemp -d)"
+for D in "$SECRETS_DIR" "$UV_PYTHON_INSTALL_DIR"; do
+    if [[ -d "$D" ]]; then
+        NAME="$(basename "$D")"
+        mkdir -p "$TMP_KEEP/$NAME"
+        cp -a "$D"/. "$TMP_KEEP/$NAME"/
+    fi
+done
 
 rm -rf "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
@@ -102,13 +109,36 @@ if [[ ! -f "${INSTALL_DIR}/pyproject.toml" ]]; then
     exit 1
 fi
 
-# --- ВОССТАНОВЛЕНИЕ СЕКРЕТОВ ПОСЛЕ rm -rf ---
-if [[ -n "$(ls -A "$TMP_SECRETS" 2>/dev/null)" ]]; then
-    mkdir -p "$SECRETS_DIR"
-    cp -a "$TMP_SECRETS"/. "$SECRETS_DIR"/
-    log_info "Секреты восстановлены из бэкапа."
+# --- ВОССТАНОВЛЕНИЕ secrets и uv-python ПОСЛЕ rm -rf ---
+for NAME in secrets uv-python; do
+    if [[ -d "$TMP_KEEP/$NAME" ]] && [[ -n "$(ls -A "$TMP_KEEP/$NAME" 2>/dev/null)" ]]; then
+        mkdir -p "${INSTALL_DIR}/$NAME"
+        cp -a "$TMP_KEEP/$NAME"/. "${INSTALL_DIR}/$NAME"/
+        log_info "Восстановлен: ${INSTALL_DIR}/$NAME"
+    fi
+done
+rm -rf "$TMP_KEEP"
+
+# --- ПОЧИНКА БИТЫХ СИМЛИНКОВ В uv-python ---
+# uv создаёт generic-симлинки (cpython-3.12-<платформа>) с АБСОЛЮТНЫМ
+# путём на полный каталог (cpython-3.12.14-<платформа>). После переноса
+# или рестора из бэкапа они мертвы -> venv не стартует, сервис падает
+# в рестарт-луп. Чиним на ОТНОСИТЕЛЬНЫЕ симлинки — они переживут любой mv.
+if [[ -d "$UV_PYTHON_INSTALL_DIR" ]]; then
+    while IFS= read -r -d '' LINK; do
+        NAME="$(basename "$LINK")"
+        STEM="${NAME%%-*}"            # cpython
+        TAIL="${NAME#*-}"; VER="${TAIL%%-*}"; PLAT="${TAIL#*-}"   # 3.12 / linux-x86_64-gnu
+        REAL="$(find "$UV_PYTHON_INSTALL_DIR" -maxdepth 1 -type d \
+            -name "${STEM}-${VER}.*-${PLAT}" | head -1)"
+        if [[ -n "$REAL" ]]; then
+            ln -sfn "$(basename "$REAL")" "$LINK"
+            log_info "Починен симлинк: $NAME -> $(basename "$REAL") (relative)"
+        else
+            log_warn "Битый симлинк без реального каталога: $LINK (удалите uv-python для переустановки)"
+        fi
+    done < <(find "$UV_PYTHON_INSTALL_DIR" -maxdepth 1 -type l -xtype l -print0)
 fi
-rm -rf "$TMP_SECRETS"
 
 # --- ЛИЧНЫЕ ДАННЫЕ В .env ПРОЕКТА (чтобы не тащили наружу секреты) ---
 rm -f "${INSTALL_DIR}/.env"
@@ -187,12 +217,16 @@ fi
 # ВАЖНО: пин 3.12. uv по умолчанию тянет новейший CPython (3.14), а
 # pydantic-core 2.27.2 из uv.lock не имеет wheel под 3.14 и падает при
 # сборке (pyo3 0.22.6 поддерживает максимум 3.13).
+# Managed-Python ставится в ${UV_PYTHON_INSTALL_DIR} (внутри INSTALL_DIR):
+# сервис работает от mcp, а /root ему недоступен; uv используется только
+# этим развёртыванием.
+export UV_PYTHON_INSTALL_DIR
 log_info "Установка Python-зависимостей (uv sync, python 3.12)..."
 cd "$INSTALL_DIR"
 uv python install 3.12
 UV_PROJECT_ENVIRONMENT="$INSTALL_DIR/.venv" uv sync --no-dev --frozen --python 3.12
 log_info "Интерпретатор venv: $("$INSTALL_DIR/.venv/bin/python" --version 2>&1)"
-chown -R mcp:mcp "$INSTALL_DIR" /opt/mcp/uv
+chown -R mcp:mcp "$INSTALL_DIR"
 chown root:mcp "${SECRETS_DIR}" "${SECRETS_DIR}/secrets.env"
 chmod 750 "$INSTALL_DIR" "${SECRETS_DIR}"
 chmod 640 "${SECRETS_DIR}/secrets.env"
